@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rayful System</title>
+    <link rel="stylesheet" href="../assets/css/main.css">
+</head>
+<body>
+    <div class="wrap">
+        <!-- header -->
+        <header>
+            <div class="head-info">
+                <h1 class="logo">payful system</h1>
+                <button type="button" class="tip">도움말</button>
+            </div>
+            <div class="head-search">
+                <div class="search-form">
+                    <div class="input-control">
+                        <input type="text" />
+                        <button type="button" class="btn-setting">검색 세팅</button>
+                        <!-- 검색 box -->
+                        <div class="box-setting">
+                            <ul>
+                                <li>
+                                    <button type="button"><b>검색</b> 설정</button>
+                                </li>
+                                <li>
+                                    <button type="button"><b>검색</b>기록삭제</button>
+                                </li>
+                                <li>
+                                    <button type="button"><b>검색</b></button>
+                                </li>
+                                <li>
+                                    <button type="button"><b>검색</b>기록</button>
+                                </li>
+                                <li>
+                                    <button type="button"><b>검색</b>엔진</button>
+                                </li>
+                                <li>
+                                    <button type="button"><b>검색</b>광고마케터</button>
+                                </li>
+                                <li>
+                                    <button type="button"><b>검색</b>기록확인</button>
+                                </li>
+                                <li>
+                                    <button type="button"><b>검색</b>엔진순위</button>
+                                </li>
+                                <li>
+                                    <button type="button"><b>검색</b>어 트렌드</button>
+                                </li>
+                            </ul>
+                            <div class="box-setting__buttom">
+                                <div class="area">
+                                    <button type="button">첫단어 보기</button>
+                                    <span class="circle"></span>
+                                    <button type="button">끝단어 보기</button>
+                                </div>
+
+                                <button class="close">닫기</button>
+                            </div>
+                        </div>
+                        <button type="button" class="btn-icon__search">검색</button>
+                    </div>
+                    <button class="btn-detail-search">상세검색</button>
+                    <!-- 검색 box -->
+                    <div class="box-detail">
+                        <button type="button" class="btn-icon__close">닫기</button>
+                        <dl class="first">
+                            <dt>키워드</dt>
+                            <dd>
+                                <div class="input-control">
+                                    <input type="text" value="입력" />
+                                </div>
+                            </dd>
+                        </dl>
+                        <dl>
+                            <dt>메뉴</dt>
+                            <dd>
+                                <div class="from-checkbox-group">
+                                    <div class="checkbox">
+                                        <input id="menu-01" type="checkbox" checked />
+                                        <label for="menu-01">통합</label>
+                                    </div>
+                                    <div class="checkbox">
+                                        <input id="menu-02" type="checkbox" />
+                                        <label for="menu-02">사이트</label>
+                                    </div>
+                                    <div class="checkbox">
+                                        <input id="menu-03" type="checkbox" />
+                                        <label for="menu-03">뉴스</label>
+                                    </div>
+                                    <div class="checkbox">
+                                        <input id="menu-04" type="checkbox" />
+                                        <label for="menu-04">전문자료</label>
+                                    </div>
+                                    <div class="checkbox">
+                                        <input id="menu-05" type="checkbox" />
+                                        <label for="menu-05">이미지</label>
+                                    </div>
+                                </div>
+                            </dd>
+                        </dl>
+                        <dl>
+                            <dt>영역</dt>
+                            <dd>
+                                <div class="from-radio-group">
+                                    <div class="radio">
+                                        <input id="area-01" type="radio" name="area" checked />
+                                        <label for="area-01">전체</label>
+                                    </div>
+                                    <div class="radio">
+                                        <input id="area-02" type="radio" name="area"/>
+                                        <label for="area-02">제목</label>
+                                    </div>
+                                    <div class="radio">
+                                        <input id="area-03" type="radio" name="area"/>
+                                        <label for="area-03">본문</label>
+                                    </div>
+                                    <div class="radio">
+                                        <input id="area-04" type="radio" name="area"/>
+                                        <label for="area-04">첨부</label>
+                                    </div>
+                                    <div class="radio">
+                                        <input id="area-05" type="radio" name="area"/>
+                                        <label for="area-05">제목+본문</label>
+                                    </div>
+                                </div>
+                            </dd>
+                        </dl>
+                        <dl>
+                            <dt>기간</dt>
+                            <dd>
+                                <div class="from-radio-group">
+                                    <div class="radio">
+                                        <input id="date-01" type="radio" name="date" checked />
+                                        <label for="date-01">전체</label>
+                                    </div>
+                                    <div class="radio">
+                                        <input id="date-02" type="radio" name="date"/>
+                                        <label for="date-02">1일</label>
+                                    </div>
+                                    <div class="radio">
+                                        <input id="date-03" type="radio" name="date"/>
+                                        <label for="date-03">1주일</label>
+                                    </div>
+                                    <div class="radio">
+                                        <input id="date-04" type="radio" name="date"/>
+                                        <label for="date-04">1개월</label>
+                                    </div>
+                                </div>
+                                <div class="dir-date-input">
+                                    <div class="radio">
+                                        <input id="date-05" type="radio" name="date"/>
+                                        <label for="date-05">기간 입력</label>
+                                    </div>
+                                    <div class="date-picker__period">
+                                        <input type="date" />
+                                        <span class="dash">~</span>
+                                        <input type="date" />
+                                    </div> 
+                                </div>
+                            </dd>
+                        </dl>
+                        <dl>
+                            <dt>정렬</dt>
+                            <dd>
+                                <div class="from-radio-group">
+                                    <div class="radio">
+                                        <input id="align-01" type="radio" name="align" checked />
+                                        <label for="align-01">정확도</label>
+                                    </div>
+                                    <div class="radio">
+                                        <input id="align-02" type="radio" name="align"/>
+                                        <label for="align-02">최신순</label>
+                                    </div>
+                                </div>
+                            </dd>
+                        </dl>
+                        <dl class="last">
+                            <dt>첨부파일</dt>
+                            <dd>
+                                <div class="from-radio-group">
+                                    <div class="radio">
+                                        <input id="file-01" type="radio" name="file" checked />
+                                        <label for="file-01">전체</label>
+                                    </div>
+                                    <div class="radio">
+                                        <input id="file-02" type="radio" name="file"/>
+                                        <label for="file-02">아래한글</label>
+                                    </div>
+                                    <div class="radio">
+                                        <input id="file-03" type="radio" name="file"/>
+                                        <label for="file-03">워드</label>
+                                    </div>
+                                    <div class="radio">
+                                        <input id="file-04" type="radio" name="file"/>
+                                        <label for="file-04">파워포인트</label>
+                                    </div>
+                                    <div class="radio">
+                                        <input id="file-05" type="radio" name="file"/>
+                                        <label for="file-05">엑셀</label>
+                                    </div>
+                                    <div class="radio">
+                                        <input id="file-06" type="radio" name="file"/>
+                                        <label for="file-06">pdf</label>
+                                    </div>
+                                    <div class="radio">
+                                        <input id="file-07" type="radio" name="file"/>
+                                        <label for="file-07">텍스트파일</label>
+                                    </div>
+                                </div>
+                            </dd>
+                        </dl>
+                        <div class="btn-area">
+                            <button class="btn__blue--search">검색</button>
+                            <button class="btn__navy--reset">초기화</button>
+                            <button class="btn__darkgray--close">취소</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="research-form">
+                    <input id="research" type="checkbox" />
+                    <label for="research">결과 내 재검색</label>
+                </div>
+            </div>
+        </header>
+
+        <!-- 검색 영역-->
+        <section class="search-terms">
+            <!-- 관련어 -->
+            <div class="related-wrap">
+                <button type="button" class="btn-related">열기/닫기</button>
+                <div class="related-container">
+                    <strong class="tit">관련어</strong>
+                    <div class="related-list">
+                        <button type="button">Microgrid platform</button>
+                        <button type="button">영림원소프트</button>
+                        <button type="button">Rayful System</button>
+                        <button type="button">관련어 목록1</button>
+                        <button type="button">관련어 목록2</button>
+                        <button type="button">관련어 목록3</button>
+                        <button type="button">관련어1</button>
+                        <button type="button">관련어2</button>
+                        <button type="button">관련어3</button>
+                        <button type="button">관련어4</button>
+                        <button type="button">관련어 목록1</button>
+                        <button type="button">관련어 목록2</button>
+                        <button type="button">관련어 목록3</button>
+                    </div>
+                </div>
+            </div>
+
+            <ul class="search-terms__tab">
+                <li class="total-wrap">
+                    <button type="button" class="total-wrap__btn">통합검색</button>
+                    <!-- 통합검색 -->
+                    <div class="total-menu">
+                        <ul>
+                            <li>
+                                <button type="button" class="icon01">
+                                    <span>통합검색</span>
+                                </button>
+                            </li>
+                            <li>
+                                <button type="button" class="icon02">
+                                    <span>직원검색</span>
+                                </button>
+                            </li>
+                            <li>
+                                <button type="button" class="icon03">
+                                    <span>사이트</span>
+                                </button>
+                            </li>
+                            <li>
+                                <button type="button" class="icon04">
+                                    <span>문서관리</span>
+                                </button>
+                            </li>
+                            <li class="on">
+                                <button type="button" class="icon05">
+                                    <span>게시판</span>
+                                </button>
+                            </li>
+                            <li>
+                                <button type="button" class="icon06">
+                                    <span>포털검색</span>
+                                </button>
+                            </li>
+                            <li>
+                                <button type="button" class="icon07">
+                                    <span>이미지</span>
+                                </button>
+                            </li>
+                        </ul>
+                    </div>
+                    <!-- PC: 검색 더보기 (통합검색, 직원검색, 사이트 ... ) -->
+                    <div class="total-search-detail">
+                        <button type="button" class="tsd-more-btn">더보기</button>
+                        <div class="total-search-detail__form">
+                            <div class="total-search-detail__content">
+                                <dl>
+                                    <dt>정렬</dt>
+                                    <dd>
+                                        <div class="radio-group">
+                                            <input id="nn01" type="radio" checked name="radio-group-03"/>
+                                            <label for="nn01">정확도</label>
+                                            <input id="nn02" type="radio" name="radio-group-03"/>
+                                            <label for="nn02">최신순</label>
+                                        </div>
+                                    </dd>
+                                </dl>
+                                <dl>
+                                    <dt>영역</dt>
+                                    <dd>
+                                        <div class="radio-group">
+                                            <input id="tt01" type="radio" checked name="radio-group-04"/>
+                                            <label for="tt01">제목+요약</label>
+                                            <input id="tt02" type="radio" name="radio-group-04"/>
+                                            <label for="tt02">제목</label>
+                                        </div>
+                                    </dd>
+                                </dl>
+                                <dl class="period">
+                                    <dt>기간</dt>
+                                    <dd>
+                                        <div class="range-wrap">
+                                            <ul class="range-values">
+                                                <li>1일</li>
+                                                <li>1주</li>
+                                                <li>1달</li>
+                                                <li>1년</li>
+                                                <li>전체</li>
+                                            </ul>
+                                            <div class="date-range">
+                                                <input type="range" class="rangeInput" value="0" id="date-01" min="0" max="4" />
+                                            </div>
+                                        </div>
+                                        <div class="total-search-detail__btn">
+                                            <button class="btn">직접입력</button>
+                                        </div>
+                                    </dd>
+                                </dl>
+                                
+                                <dl class="years">
+                                    <dt>연도</dt>
+                                    <dd>
+
+                                        <div class="total-search-detail__btn">
+                                            <button class="btn">적용</button>
+                                        </div>
+                                    </dd>
+                                </dl>
+                            </div>
+                            <div class="bottom-reset">
+                                <button type="button" class="btn-reset">전체 초기화</button>
+                            </div>
+                        </div>
+                    </div>
+                </li>
+                <li class="popular-wrap">
+                    <button type="button" class="popular-wrap__btn">인기 검색어</button>
+                    <div class="popular-list">
+                        <div class="popular-list__container">
+                            <ol class="popular-list__content" style="transform: translateX(0px);">
+                                <li>
+                                    <a href="#">
+                                        <span class="num">1</span>
+                                        <span class="txt">액트지오 아브레우 박사 액트지오 아브레우 박사 액트지오 아브레우 박</span>
+                                        <span class="ranking up auto">5</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="#">
+                                        <span class="num">2</span>
+                                        <span class="txt">김용진 뉴스타파 대표</span>
+                                        <span class="ranking down auto">1</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="#">
+                                        <span class="num">3</span>
+                                        <span class="txt">밀양 가해자 볼보</span>
+                                        <span class="ranking up auto">5</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="#">
+                                        <span class="num">4</span>
+                                        <span class="txt">원 구성 모레까지</span>
+                                        <span class="new-txt auto">New</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="#">
+                                        <span class="num">5</span>
+                                        <span class="txt">쿠에바스 두산</span>
+                                        <span class="ranking up auto">1</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="#">
+                                        <span class="num">6</span>
+                                        <span class="txt">쿠에바스 두산</span>
+                                        <span class="ranking auto">-</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="#">
+                                        <span class="num">7</span>
+                                        <span class="txt">쿠에바스 두산</span>
+                                        <span class="ranking up auto">1</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="#">
+                                        <span class="num">8</span>
+                                        <span class="txt">쿠에바스 두산</span>
+                                        <span class="ranking up auto">1</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="#">
+                                        <span class="num">9</span>
+                                        <span class="txt">쿠에바스 두산</span>
+                                        <span class="ranking up auto">1</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="#">
+                                        <span class="num">10</span>
+                                        <span class="txt">쿠에바스 두산</span>
+                                        <span class="ranking up auto">1</span>
+                                    </a>
+                                </li>
+                            </ol>   
+                        </div>
+                        <div class="btn-more-link next on">
+                            <a href="#">6~10위</a>
+                        </div>
+                        <div class="btn-more-link prev">
+                            <a href="#">1~5위</a>
+                        </div>
+                    </div>
+                </li>
+            </ul>
+
+            <!-- Mobile, Tablet: 검색 더보기 (통합검색, 직원검색, 사이트 ... ) -->
+            <div class="total-search-detail">
+                <button type="button" class="tsd-more-btn">더보기</button>
+                <div class="total-search-detail__form">
+                    <div class="total-search-detail__content">
+                        <dl>
+                            <dt>정렬</dt>
+                            <dd>
+                                <div class="radio-group">
+                                    <input id="n01" type="radio" checked name="radio-group-01"/>
+                                    <label for="n01">정확도</label>
+                                    <input id="n02" type="radio" name="radio-group-01"/>
+                                    <label for="n02">최신순</label>
+                                </div>
+                            </dd>
+                        </dl>
+                        <dl>
+                            <dt>영역</dt>
+                            <dd>
+                                <div class="radio-group">
+                                    <input id="t01" type="radio" checked name="radio-group-02"/>
+                                    <label for="t01">제목+요약</label>
+                                    <input id="t02" type="radio" name="radio-group-02"/>
+                                    <label for="t02">제목</label>
+                                </div>
+                            </dd>
+                        </dl>
+                        <dl class="period">
+                            <dt>기간</dt>
+                            <dd>
+                                <div class="range-wrap">
+                                    <ul class="range-values">
+                                        <li>1일</li>
+                                        <li>1주</li>
+                                        <li>1달</li>
+                                        <li>1년</li>
+                                        <li>전체</li>
+                                    </ul>
+                                    <div class="date-range">
+                                        <input type="range" class="rangeInput" value="0" id="date-01" min="0" max="4" />
+                                    </div>
+                                </div>
+                                <div class="total-search-detail__btn">
+                                    <button class="btn">직접입력</button>
+                                </div>
+                            </dd>
+                        </dl>
+                    </div>
+                    <div class="bottom-reset">
+                        <button type="button" class="btn-reset">전체 초기화</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- container -->
+        <main class="container">
+            <section class="content">
+                <article>
+                    <div class="box-nodata">
+                        <div class="box-nodata__header">
+                            <p class="tit">
+                                <strong>키워드</strong> 에 대한 검색 결과가 없습니다.
+                            </p>
+                        </div>
+                        <article class="box-nodata__content">
+                            <ul class="info-list circle">
+                                <li>찾고자하는 검색어를 입력하시고, 검색 버튼을 눌러주세요.</li>
+                            </ul>
+                        </article>
+                        <div class="box-nodata__btnarea">
+                            <a href="#" class="btn__blue">이전 페이지로 돌아가기</a>
+                            <a href="#" class="btn__darkgray">초기화면으로 돌아가기</a>
+                        </div>
+                    </div>
+                </article>
+            </section>
+        </main>
+
+        <!-- footer -->
+        <footer>
+            <div class="inner">
+                <div class="search-form">
+                    <div class="input-control">
+                        <input type="text" />
+                        <button type="button" class="btn-setting">검색 세팅</button>
+
+                        <!-- 검색 box -->
+                        <div class="box-setting">
+                            <div class="box-setting__buttom">
+                                <div class="area">
+                                    <button type="button">첫단어 보기</button>
+                                    <span class="circle"></span>
+                                    <button type="button">끝단어 보기</button>
+                                </div>
+
+                                <button class="close">닫기</button>
+                            </div>
+                            <ul>
+                                <li>
+                                    <button type="button"><b>검색</b> 설정</button>
+                                </li>
+                                <li>
+                                    <button type="button"><b>검색</b>기록삭제</button>
+                                </li>
+                                <li>
+                                    <button type="button"><b>검색</b></button>
+                                </li>
+                                <li>
+                                    <button type="button"><b>검색</b>기록</button>
+                                </li>
+                                <li>
+                                    <button type="button"><b>검색</b>엔진</button>
+                                </li>
+                                <li>
+                                    <button type="button"><b>검색</b>광고마케터</button>
+                                </li>
+                                <li>
+                                    <button type="button"><b>검색</b>기록확인</button>
+                                </li>
+                                <li>
+                                    <button type="button"><b>검색</b>엔진순위</button>
+                                </li>
+                                <li>
+                                    <button type="button"><b>검색</b>어 트렌드</button>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <button type="button" class="btn-icon__search">검색</button>
+                    </div>
+                </div>
+                <p class="copy">© Rayful System 2024. All rights reserved.</p>
+            </div>
+        </footer>
+    </div>
+    <script src="../js/main.js">
+        //TODO: 문의사항 
+        // 1. 모바일 인기검색어 6~10위 버튼 용도
+        //TODO: 관련어 ( on / off )
+        //TODO: 통합검색 ( on / off )
+        //TODO: 인기 검색어 ( on / off )
+        //TODO: 정렬 
+        //TODO: 검색 on/off
+        //TODO: 상세검색 on/off
+    </script>
+</body>
+</html>

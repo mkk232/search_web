@@ -1,0 +1,129 @@
+// _variables.scss 파일에 정의된 변수를 가져옵니다.
+@import 'variables';
+@import 'mixins';
+
+// 기본 스타일 정의
+* {
+    margin:0;
+    padding:0;
+    font-family: $notosans;
+    font-size:10px;
+    line-height: 1;
+    color:#00142F;
+    box-sizing: border-box;
+    font-optical-sizing: auto;
+    font-weight: $font-regular;
+    font-style: normal;
+}
+
+*, *:before, *:after {
+    box-sizing: border-box;
+}
+
+html, body{
+    width:100%;
+    height: 100%;
+}
+
+html {
+    -webkit-tap-highlight-color:rgba(0,0,0,0);
+}
+
+body {
+    min-width: 320px;
+    color: #333;
+    line-height: 1.6;
+    background-color: #f2f4f7;
+    -webkit-text-size-adjust:none;
+    word-wrap:break-word;
+    word-break:break-all;
+}
+
+body, input, select, textarea, button {
+    border:none;
+    font-size:1.2rem;
+    color: #727272;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-weight: normal;
+}
+
+ul, ol, li{
+    list-style:none;
+}
+
+table{
+    width:100%;
+    border-spacing:0;
+    border-collapse:collapse;
+}
+
+label, img, input, select, textarea, button {
+    vertical-align: middle;
+    background-color: transparent;
+}
+
+
+img, fieldset{
+    border:0;
+}
+
+a {
+    color:#000;
+    text-decoration:none;
+}
+
+button {
+    cursor: pointer;
+}
+
+hr { 
+    display:none; 
+}
+
+main, header, section, nav, footer, aside, article, figure{
+    display:block;
+}
+
+iframe {
+    border: 0;
+    padding: 0;
+}
+
+// margin
+
+.mb-0 {
+    margin-bottom: 0px !important;
+}
+
+.mb-10 {
+    margin-bottom: 10px !important;
+}
+
+.mb-20 {
+    margin-bottom: 20px !important;
+}
+
+.mt-0 {
+    margin-top: 0px !important;
+}
+
+.mt-10 {
+    margin-top: 10px !important;
+}
+
+.mt-20 {
+    margin-top: 20px !important;
+}
+
+// padding
+.p0 {
+    padding: 0px !important;
+}
+
+@include responsive(768px) {
+
+}
+
+

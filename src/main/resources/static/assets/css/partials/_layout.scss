@@ -1,0 +1,207 @@
+.wrap {
+    position: relative;
+    min-height: 100%;
+}
+
+header {
+    position: relative;
+    background-color: #008cf1;
+    
+    .head-info {
+        @include flex-box(space-between, center);
+
+        height: 45px;
+        padding: 0 12px;
+        border-bottom: 1px solid #33a3f4;
+        
+        .logo {
+            @include blindText();
+
+            width: 68px;
+            height: 25px;
+            background: url('../images/common/logo_mobile.svg') no-repeat 0 0;
+            background-size: 100%;
+
+            @include responsive(768px) {
+                width: 68px;
+                height: 25px;
+            }
+
+            @include responsive(1280px) {
+                width: 80px;
+                height: 30px;
+            }
+        }
+
+        .tip {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 30px;
+            height: 30px;
+            background-color: #33a3f4;
+            border-radius: 100%;
+            text-indent: -9999px;
+
+            &::before {
+                width: 15px;
+                height: 15px;
+                border-radius: 100%;
+                background: url('../images/icon/icon_help.svg') no-repeat 0 0;
+                background-size: 100%;
+                content: "";
+                
+                @include responsive(768px) {
+                    width: 15px;
+                    height: 15px;
+                }
+            }
+            
+            &:hover {
+                background-color: #fff;
+                color: #33a3f4;
+
+                &::before {
+                    background: url('../images/icon/icon_help_on.svg') no-repeat 0 0;
+                }
+            }
+
+            @include responsive(768px) {
+                width: 30px;
+                height: 30px;
+            }
+
+            @include responsive(1280px) {
+                position: absolute;
+                right: 30px;
+                top: 20px;
+                width: 77px;
+                height: 26px;
+                text-indent: 0;
+                border-radius: 15px;
+                color: #fff;
+                gap: 0 5px;
+            }
+        }
+
+        @include responsive(768px) {
+            height: 45px;
+            padding: 0 30px;
+        }
+
+        @include responsive(1280px) {
+            border-bottom: none;
+            margin-right: 90px;
+            padding: 0;
+        }
+    }
+
+    .head-search {
+        padding: 13px 16px;
+
+        .research-form {
+            margin-top: 5px;
+
+            @include responsive(1280px) {
+                margin-top: 0px;
+            }
+        }
+
+        @include responsive(768px) {
+            padding: 14px 30px;
+        }
+
+        @include responsive(1280px) {
+            display: flex;
+            align-items: center;
+            padding: 0px;
+            gap: 0 20px;
+        }
+    }
+
+    @include responsive(1280px) {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        display: flex;
+        align-items: center;
+        height: 65px;
+        padding: 0 30px;
+        z-index: 10000;
+        
+        .search-form {
+            .input-control {
+                width: 400px;
+            }
+        }
+        
+    }
+}
+
+.container {
+    position: relative;
+    padding-bottom: 100px;
+    z-index: 0;
+
+    .content {
+        padding: 30px 15px 60px;
+    }
+
+    @include responsive(1280px) {
+        padding: 65px 200px 100px;
+
+        .content {
+            padding: 30px 30px 60px;
+        }
+    }
+}
+
+footer {
+    @include flex-box(center, center);
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 100px;
+    background-color: #e1e5ea;
+    padding: 20px 15px;
+    z-index: 10;
+
+    .inner {
+        width: 100%;
+    }
+
+    .copy {
+        font-size: 1.2rem;
+        text-align: center;
+        margin-top: 12px;
+        color: #8d8e90;
+    }
+
+    .search-form {
+        .box-setting {
+            top:auto;
+            bottom: 100px;
+            border-radius: 4px 4px 0 0;
+            box-shadow: 0 -4px 4px rgba(0,0,0,0.25);
+
+            &__buttom {
+                border-top: none;
+                border-bottom: 1px solid $color-lightgray;
+            }
+        }
+        
+        @include responsive(768px) {
+            .box-setting {
+                bottom: 34px;
+            }
+        }
+    }
+
+    @include responsive(768px) {
+        .inner {
+            width: 400px;
+        }
+    }
+}

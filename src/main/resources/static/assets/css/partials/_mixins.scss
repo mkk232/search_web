@@ -1,0 +1,248 @@
+
+@function str-equal($str1, $str2) {
+    @return $str1 == $str2;
+};
+
+// Define mixins for reusable code
+@mixin flex-box($row: 'flex-start', $col: 'center', $gap: 0) {
+    display: flex;
+    justify-content: $row;
+    align-items: $col;
+    gap: $gap;
+}
+
+//btn
+@mixin button ($type: 'default', $size: 'default', $icon: 'default'){
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+    border-radius: 4px;
+
+    &:disabled {
+        opacity: 0.6;
+    }
+
+    @if ($type == 'default') {
+        color: $font-default-color;
+        background-color: #fff;
+        border: 1px solid $color-default-border;
+        
+        &:hover:not([disabled]),
+        &:focus:not([disabled]) {
+            background-color: #F5F5F5;
+            border: 1px solid $color-gray;
+        }
+
+    } @else if($type == 'blue') {
+        color: #fff;
+        background-color: $color-primary;
+        border: 1px solid $color-primary;
+        
+        &:hover:not([disabled]),
+        &:focus:not([disabled]) {
+            background-color: #0079D1;
+            border: 1px solid #0079D1;
+        }
+
+    } @else if($type == 'navy') {
+        color: #fff;
+        background-color: $color-secondary;
+        border: 1px solid $color-secondary;
+        
+        &:hover:not([disabled]),
+        &:focus:not([disabled]) {
+            background-color: #00508B;
+            border: 1px solid #00508B;
+        }
+
+    } @else if($type == 'darkgray') {
+        color: #fff;
+        background-color: $color-darkgray;
+        border: 1px solid $color-darkgray;
+        
+        &:hover:not([disabled]),
+        &:focus:not([disabled]) {
+            background-color: #333;
+            border: 1px solid #333;
+        }
+    }
+
+    @if($size == 'default') {
+        min-width: 66px;
+        height: 30px;
+        padding: 0 10px;
+    } @else if($size == 'small') {
+        min-width: 60px;
+        height: 25px;
+        padding: 0 10px;
+    } @else if($size == 'large') {
+        min-width: 72px;
+        height: 40px;
+        padding: 0 15px;
+    }
+
+    @if($icon == 'search') {
+        gap: 0 6px;
+
+        &::before {
+            @include backgroundImage('../images/icon/icon_search_white.svg', 0 0, 100%);
+            width: 15px;
+            height: 15px;
+            content: '';
+        }
+
+    } @else if($icon == 'reset') {
+        gap: 0 6px;
+
+        &::before {
+            @include backgroundImage('../images/icon/icon_reset_white.svg', 0 0, 100%);
+            width: 15px;
+            height: 15px;
+            content: '';
+        }
+
+    } @else if($icon == 'close') {
+        gap: 0 6px;
+        
+        &::before {
+            @include backgroundImage('../images/icon/icon_close_white.svg', 0 0, 100%);
+            width: 8px;
+            height: 8px;
+            content: '';
+        }
+    }
+}
+
+@mixin btnTextIcon ($type) {
+    display: flex;
+    align-items: center;
+    gap: 0 7px;
+    font-size: 1.4rem;
+
+    &:hover:not([disabled]),
+    &:focus:not([disabled]) {
+        text-decoration: underline;
+    }
+
+    &:disabled {
+        opacity: 0.6;
+    }
+
+    @if ($type == 'reset') {
+        color: $font-default-color;
+
+        &::before {
+            @include backgroundImage('../images/icon/icon_reset.svg', 0 0, 100%);
+            width: 12px;
+            height: 12px;
+            content: '';
+        }
+    } @else if ($type == 'more'){
+        color: $color-gray;
+
+        &::after {
+            @include backgroundImage('../images/icon/icon_more.svg', 0 0, 100%);
+            width: 6px;
+            height: 10px;
+            content: '';
+        }
+
+    } @else if ($type == 'download'){
+        color: $font-default-color;
+
+        &::after {
+            @include backgroundImage('../images/icon/icon_download.svg', 0 0, 100%);
+            width: 12px;
+            height: 12px;
+            content: '';
+        }
+        
+    } @else if ($type == 'close'){
+        color: $font-default-color;
+        gap: 0 2px;
+
+        &::after {
+            @include backgroundImage('../images/icon/icon_close.svg', 0 0, 100%);
+            width: 16px;
+            height: 16px;
+            content: '';
+        }
+    }
+}
+
+@mixin btn-icon ($type) {
+    text-indent: -9999px;
+    border: 1px solid $color-default-border;
+    border-radius: 4px;
+
+    &:disabled {
+        opacity: 0.6;
+    }
+
+    @if ($type == 'arrow'){
+        @include backgroundImage('../images/icon/icon_related_arrow.svg', 50%, 13px 8px);
+        width: 28px;
+        height: 28px;
+        background-color: #fff;
+
+    } @else if ($type == 'search'){
+        @include backgroundImage('../images/btn/btn_search.svg', 50%, 16px);
+        width: 35px;
+        height: 35px;
+        background-color: #fff;
+        border-radius: 0 4px 4px 0;
+
+    } @else if ($type == 'preview'){
+        @include backgroundImage('../images/icon/icon_preview.svg', 50%, 10px);
+        width: 20px;
+        height: 20px;
+        background-color: #fff;
+        border-radius: 2px;
+
+        &:hover:not([disabled]),
+        &:focus:not([disabled]),
+        &.on {
+            @include backgroundImage('../images/icon/icon_preview_white.svg', 50%, 10px);
+                background-color: $color-default-icon;
+        }
+        
+    } @else if ($type == 'close'){
+        @include backgroundImage('../images/icon/icon_close.svg', 50%, 21px);
+        width: 28px;
+        height: 28px;
+        background-color: #fff;
+
+    } @else if ($type == 'close2'){
+        @include backgroundImage('../images/icon/icon_close.svg', 50%, 10px);
+        width: 14px;
+        height: 14px;
+        background-color: #fff;
+        border-radius: 2px;
+    }
+}
+
+// blind
+@mixin blindText (){
+    text-indent: -9999px;
+    clip: rect(0 0 0 0);
+    overflow: hidden;
+}
+
+@mixin backgroundImage ($url, $position: 0 0, $size: 100%) {
+    background: url($url) no-repeat $position;
+    background-size: $size;
+}
+
+@mixin responsive($breakpoint) {
+    @media only screen and (min-width: $breakpoint) {
+        @content;
+    }
+}
+
+@mixin responsiveMax($breakpoint) {
+    @media only screen and (max-width: $breakpoint) {
+        @content;
+    }
+}
+

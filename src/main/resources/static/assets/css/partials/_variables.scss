@@ -1,0 +1,39 @@
+@import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css");
+
+$notosans: "pretendard", "맑은고딕", "Malgun Gothic", "돋움", Dotum, Apple sd gothic neo, Apple Gothic, Sans-serif ;
+
+/* 폰트 컬러 */
+// blue
+$color-primary: #008CF1;
+$color-secondary: #0064AD;
+$color-third: #0050C7;
+$color-paleblue: #EEF8FF;
+
+// gray
+$color-palegray: #F2F4F7;
+$color-lightgray: #EFEFEF;
+$color-default-border: #DDDDDD;
+$color-gray: #919191;
+$color-darkgray: #444444;
+$color-default-icon: #3C3C3C;
+$color-red: #F42F52;
+
+//font
+$font-default-color: #333;
+
+/* 폰트 사이즈 */
+$font-size-base: 1.6rem; // 기본 폰트 사이즈 (16px)
+$font-size-lg: 2rem; // 큰 폰트 사이즈 (20px)
+$font-size-sm: 1.4rem; // 작은 폰트 사이즈 (14px)
+$font-size-xs: 1.2rem; // 매우 작은 폰트 사이즈 (12px)
+
+/* bold */
+$font-bold-black: 900;
+$font-extraBold: 800;
+$font-bold: 700;
+$font-semiBold: 600;
+$font-medium: 500;
+$font-regular: 400;
+$font-light: 300;
+$font-extraLight: 200;
+$font-thin: 100;
