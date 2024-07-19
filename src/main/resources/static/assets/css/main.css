@@ -2161,6 +2161,7 @@ footer .search-form .box-setting__buttom {
   }
 }
 @media only screen and (min-width: 1280px) and (min-width: 1280px) {
+/* 2024-07-17 확장자 파일 필터 style 제거
   .search-terms .total-wrap .total-search-detail__content .files ul {
     display: flex;
     flex-wrap: wrap;
@@ -2168,7 +2169,7 @@ footer .search-form .box-setting__buttom {
   .search-terms .total-wrap .total-search-detail__content .files ul li {
     width: 45%;
     margin-bottom: 0px;
-  }
+  }*/
   .search-terms .total-wrap .total-search-detail__content .org {
     display: block;
   }

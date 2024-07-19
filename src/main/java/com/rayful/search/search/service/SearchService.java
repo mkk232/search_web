@@ -29,13 +29,13 @@ public class SearchService {
     private WebClient webClient;
 
     public Map<String, Object> getSearch(SearchVO searchVO) throws ConnectException {
-        HttpHeaders reqHeaders = HttpUtils.getHeaders();
+        searchVO.setUserId("ssh6019");
+
+        HttpHeaders reqHeaders = HttpUtils.getHeaders(searchVO.getUserId());
 
         if("N".equals(searchVO.getRegDtmYn())) {
             searchVO.setPeriod();
         }
-
-        searchVO.setUserId("ssh6019");
 
         System.out.println("searchVO = " + searchVO);
 
@@ -56,15 +56,15 @@ public class SearchService {
     }
 
     public Map<String, Object> getAutoComplete() {
-        HttpHeaders reqHeaders = HttpUtils.getHeaders();
+//        HttpHeaders reqHeaders = HttpUtils.getHeaders();
 
         // TODO - API 구현 필요
-        Map<String, Object> apiResultMap = this.webClient.post()
-                .headers(headers -> headers.addAll(reqHeaders))
-                .body(null)
-                .retrieve()
-                .bodyToMono(Map.class)
-                .block();
+//        Map<String, Object> apiResultMap = this.webClient.post()
+//                .headers(headers -> headers.addAll(reqHeaders))
+//                .body(null)
+//                .retrieve()
+//                .bodyToMono(Map.class)
+//                .block();
 
         return null;
     }

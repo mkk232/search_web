@@ -1,9 +1,7 @@
-function printEapproval(target, data) {
+function printEapproval(target, data, isAddMoreBtn) {
     let sectionName = data.sectionName;
-
-
-
     let docList = '';
+    let collapseCd = data.sectionCode;
     $.each(data.docList, function(index, doc) {
         let attachList = '';
         $.each(doc.attach_info, function(index, attach) {
@@ -94,12 +92,13 @@ function printEapproval(target, data) {
                         )
                 )
                 .append(
-                    data.sectionCnt > 10 ?
+                    data.sectionCnt > 5 ?
                     $('<div />')
                         .addClass('more-info-area')
                         .append(
-                            $('<a href="#" />')
+                            $('<a />')
                                 .addClass('btn-icon-text__more')
+                                .attr('data-search-collapse-cd', collapseCd)
                                 .text(sectionName + ' 더보기')
                         )
                         : ''
@@ -189,18 +188,79 @@ function printPeople(target, data) {
 
 }
 
-function printAggregation(data) {
-    // console.log(data);
-    if(data.aggregations != null) {
-        console.log(data.aggregations)
-        $.each(data.aggregations, function(index, aggregation) {
-            console.log(aggregation.field);
-            $.each(aggregation.buckets, function(index, item) {
-                console.log(item);
+function printAggregation(target, data) {
+    let field = '';
+    let li = '';
+    $.each(data.sectionList[0].aggregations, function(index, aggregations) {
+            field = aggregations.field;
+            li = '';
+            $.each(aggregations.buckets, function(itemIndex, item) {
+                li += $('<li />')
+                    .append(
+                        $('<input type="checkbox" />')
+                            .attr('id', 'agg_' + index + '_' + itemIndex)
+                            .attr('name', 'agg_' + index)
+                            .val(item.key)
+                    )
+                    .append(
+                        $('<label />')
+                            .attr('for', 'agg_' + index + '_' + itemIndex)
+                            .text(item.key + ' (' + item.doc_count +')')
+                    )[0].outerHTML;
             })
 
-        })
-    }
+            target.append(
+                $('<dl />')
+                    .attr('data-name', field)
+                    .addClass(field)
+                    .append(
+                        $('<dt />')
+                            .text(aggregations.name)
+                    )
+                    .append(
+                        $('<dd />')
+                            .append(
+                                $('<div />')
+                                    .addClass('checkbox-group')
+                                    .append(
+                                        $('<ul />')
+                                            .append(li)
+                                    )
+                            )
+                    )
+                    .append(
+                        $('<div />')
+                            .addClass('total-search-detail__btn')
+                            .append(
+                                $('<button />')
+                                    .addClass('btn search-btn')
+                                    .text('적용')
+                            )
+                    )
+            )
+    })
+
+    //print
+    /*    target.append(
+            $('<dl />')
+                .addClass('years')
+                .append(
+                    $('<dt />').text('연도')
+                )
+                .append(
+                    $('<dd />')
+                        .append(
+                            $('<div />')
+                                .addClass('checkbox-group')
+                                .append(
+                                    $('<ul />')
+                                        .append(
+                                            li
+                                        )
+                                )
+                        )
+                )
+        )*/
 }
 
 function printNoResult(target, data) {
@@ -234,7 +294,7 @@ function printNoResult(target, data) {
                             )
                     )
             )
-            .append(
+            /*.append(
                 $('<div />')
                     .addClass('box-nodata__btnarea')
                     .append(
@@ -248,7 +308,7 @@ function printNoResult(target, data) {
                             .text('초기화면으로 돌아가기')
                     )
 
-            )
+            )*/
     )
 
 }
@@ -280,7 +340,7 @@ function printNoKeyword() {
                             )
                     )
             )
-            .append(
+            /*.append(
                 $('<div />')
                     .addClass('box-nodata__btnarea')
                     .append(
@@ -294,7 +354,7 @@ function printNoKeyword() {
                             .text('초기화면으로 돌아가기')
                     )
 
-            )
+            )*/
     )
 }
 

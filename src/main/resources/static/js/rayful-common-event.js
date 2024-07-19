@@ -53,6 +53,17 @@ $('input[name=filter_area], input[name=detail_area]').on('change', function(e) {
     }
 })
 
+// 상세검색 - Filter 기간 클릭 이벤트
+$('input[name$=_date]').on('change', function(e) {
+    let checkedDateValue = $(this).val();
+    if(e.target.name.startsWith('detail_')) {
+        $('input[type=range].rangeInput').val(checkedDateValue);
+        effectRange($('input[type=range].rangeInput'));
+    } else if(e.target.name.startsWith('filter_')) {
+        $('input[name=detail_date]').val(checkedDateValue);
+    }
+})
+
 // 상세검색 - Filter 기간 직접입력 이벤트
 $('input[name$=_date-self-start], input[name$=_date-self-end]').on('change', function(e) {
     let selectedDate = $(this).val();
@@ -82,13 +93,13 @@ $('div.total-menu ul li').on('click', function() {
     }
 })
 
-// Filter 이벤트
+// Filter 클릭 이벤트
 $('div.total-search-detail__content input[type=radio], div.total-search-detail__content input[type=range]')
                                                                 .on('change', function() {
     $('div.input-control button.search-btn').trigger('click');
 })
 
-//  상세검색 - 첨부파일 전체 클릭 이벤트
+//  상세검색 - 첨부파일 체크박스 클릭 이벤트
 $('input[name=detail_file]').on('change', function(e) {
     if($(this).attr('id') == 'file-all') {
         let checkAll = $(this).prop('checked');
@@ -107,6 +118,22 @@ $('input[name=detail_file]').on('change', function(e) {
     }
 })
 
+// 상세검색 - 키워드 입력 이벤트
+$('.search-input').on('keyup', function() {
+    $('.search-input').val($(this).val());
+})
+
+// 통합검색 - 더보기 클릭 이벤트
+$(document).off().on('click', '.btn-icon-text__more' ,function() {
+
+    let target = $('main.container section.content article');
+    target.empty();
+
+    $('div.total-menu ul li.on').removeClass('on');
+    $('div.total-menu ul li[data-search-collapse-cd='+ $(this).data('searchCollapseCd') +']').trigger('click');
+    // $('div.search-form .search-btn').trigger('click');
+})
+
 // 첨부파일 미리보기 이벤트
 /*
 $(document).on('click', 'button.btn-icon__preview, button.btn-preview-close', function() {
@@ -123,17 +150,3 @@ $(document).on('click', 'button.btn-icon__preview, button.btn-preview-close', fu
     }
 })
 */
-
-// Date to string format
-function formatDateString(dateString) {
-    if(dateString === undefined || dateString === null) {
-        return dateString;
-    }
-
-    const TIME_ZONE = 9 * 60 * 60 * 1000; // 9시간
-    let d = new Date(dateString);
-
-    let date = new Date(d.getTime() + TIME_ZONE).toISOString().split('T')[0];
-    // let time = d.toTimeString().split(' ')[0];
-    return date;
-}

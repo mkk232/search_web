@@ -27,17 +27,20 @@
 
 <script type="text/javascript">
     $(document).ready(function() {
-
-        // TODO -
+        $('input[type=range].rangeInput').on('change', function(event) {
+            $('input[type=range].rangeInput').val(event.target.value);
+            effectRange($('input[type=range].rangeInput'));
+         })
 
         // TODO - 페이지 로드 시 기간 range 설정 필요
         $('input[type=range].rangeInput').val(4);
+        effectRange($('input[type=range].rangeInput'));
 
         // TODO - 배포 시 삭제
         reqSearch();
 
         // 검색 아이콘 클릭 이벤트
-        $('.search-btn').on('click', function(e) {
+        $(document).on('click', '.search-btn', function(e) {
             reqSearch(e);
             $('button.btn-detail-close').trigger('click');
         })
@@ -52,6 +55,11 @@
             }
         })
 
+        $('input[id^=file], input[id^=year]').on('change', $('dl.files, dl.years'), function() {
+            console.log('click')
+            reqSearch();
+        })
+
         // Filter - 기간 직접입력 검색 이벤트
         $('button.filter_period-search-btn').on('click', function(e) {
             $('button.filter_period-close-btn.btn__darkgray--close').trigger('click');
@@ -63,6 +71,7 @@
             let searchKeyword = $('.search-input').val();
 
             if(e !== undefined) {
+                // trigger 요청
                 if(e.isTrigger === 3) {
                     searchKeyword = $('input[name=kwd]').val();
                 }
@@ -75,7 +84,7 @@
 
             let sendData = {
                 kwd: searchKeyword,
-                srchArea: $('input[name=detail_area]:checked').val(),
+                // srchArea: [''],
                 collapseCd: $('div.total-menu ul li.on').data('searchCollapseCd'),
                 size: 10,
                 sort: $('input[name=detail_sort]:checked').val(),
@@ -84,6 +93,13 @@
                 prevKwd: [''],
                 period : $('div.date-range input[type=range]').val()
             }
+
+            // TODO - 디자인 작업 후 수정 필요
+            // 검색 영역
+            let searchAreaList = [];
+            let checkedArea = $('input[name=detail_area]:checked').val();
+            searchAreaList.push(checkedArea);
+            sendData['srchArea'] = searchAreaList;
 
             // 결과 내 재검색
             if($('input#research').prop('checked')) {
@@ -111,17 +127,13 @@
             $('input[name=kwd]').val(searchKeyword);
 
             // 첨부파일
-            let attachType = '';
+            let attachList = [];
             if(!($('input#file-all').prop('checked'))) {
                 $.each($('input[name=detail_file]:checked'), function(index, item) {
-                    attachType += $(item).val();
-                    if(!(index == $('input[name=detail_file]:checked').length - 1)) {
-                        attachType += "###";
-                    }
+                    attachList.push($(item).val());
                 })
-
-                sendData['attachedType'] = attachType;
             }
+            sendData['attachedType'] = attachList;
 
             // 필터 기간 직접입력 검색
             if(e !== undefined ) {
@@ -137,9 +149,28 @@
                 }
             }
 
+            let filterOption = {};
+            $.each($('div#aggregation dl'), function(index, filter) {
+                let field = '';
+                let checkedValue = [];
+
+                console.log($(filter).find('input[type=checkbox]:checked').length);
+                if($(filter).find('input[type=checkbox]:checked').length > 0) {
+                    $.each($(filter).find('input[type=checkbox]:checked'), function(index, item) {
+                        field = $(item).closest('dl').data('name');
+                        checkedValue.push($(item).val());
+                    })
+                    filterOption[field] = checkedValue;
+                }
+            })
+
+            sendData['filterOption'] = filterOption
+
             console.log(sendData);
 
-            $('main.container section.content article').empty();
+            let target = $('main.container section.content article');
+            target.empty();
+
             $.ajax({
                 url: '/search.json',
                 type: 'POST',
@@ -147,7 +178,7 @@
                 contentType: 'application/json; charset=utf-8',
                 timeout: 10000,
                 success: function(data) {
-                    printSections(data.result);
+                    printSections(target, data.result);
                 },
                 error: function (data, xhr, responseText) {
                     if(data.responseText.status == 1) {
@@ -156,6 +187,7 @@
                 }
             })
         }
+
     })
 
 
@@ -165,9 +197,11 @@ function reqAutoComplete() {
     let keyword = $('.search-input').val();
 }
 
-function printSections(data) {
-    let target = $('main.container section.content article')
-   // target.empty();
+function printSections(target, data) {
+
+    // Aggregation 초기화
+    let aggTarget = $('div#aggregation');
+    aggTarget.empty();
 
     if(data.result.totalCnt > 0) {
         printSearchInfo(target, data.result);
@@ -186,17 +220,15 @@ function printSections(data) {
             }
         })
 
-        let currentTabCd = $('div.total-menu ul li.on').data('searchCollapseCd');
-        if(currentTabCd == 99999 || currentTabCd == 10000 || currentTabCd == 20000 || currentTabCd == 40000) {
-            console.log("call printAggregation");
-            printAggregation(data.result);
-        }
-
+        printAggregation(aggTarget, data.result);
     } else {
         printNoResult(target, data.result);
     }
+    let currentTabCd = $('div.total-menu ul li.on').data('searchCollapseCd');
+
 
 }
+
 
 </script>
 <body>
@@ -205,7 +237,7 @@ function printSections(data) {
         <header>
             <div class="head-info">
                 <h1 class="logo">payful system</h1>
-                <button type="button" class="tip">도움말</button>
+                <%--<button type="button" class="tip">도움말</button>--%>
             </div>
             <div class="head-search">
                 <div class="search-form">
@@ -268,7 +300,7 @@ function printSections(data) {
                         <dt>키워드</dt>
                         <dd>
                             <div class="input-control">
-                                <input type="text" value="입력" />
+                                <input type="text" class="search-input" />
                             </div>
                         </dd>
                     </dl>
@@ -300,20 +332,24 @@ function printSections(data) {
                         <dd>
                             <div class="from-radio-group">
                                 <div class="radio">
-                                    <input id="detail_date-all" type="radio" name="detail_date" checked />
+                                    <input id="detail_date-all" type="radio" name="detail_date" value="4" checked />
                                     <label for="detail_date-all">전체</label>
                                 </div>
                                 <div class="radio">
-                                    <input id="detail_date-day" type="radio" name="detail_date"/>
+                                    <input id="detail_date-day" type="radio" name="detail_date" value="0"/>
                                     <label for="detail_date-day">1일</label>
                                 </div>
                                 <div class="radio">
-                                    <input id="detail_date-week" type="radio" name="detail_date"/>
+                                    <input id="detail_date-week" type="radio" name="detail_date" value="1"/>
                                     <label for="detail_date-week">1주일</label>
                                 </div>
                                 <div class="radio">
-                                    <input id="detail_date-month" type="radio" name="detail_date"/>
+                                    <input id="detail_date-month" type="radio" name="detail_date" value="2"/>
                                     <label for="detail_date-month">1개월</label>
+                                </div>
+                                <div class="radio">
+                                    <input id="detail_date-year" type="radio" name="detail_date" value="3"/>
+                                    <label for="detail_date-year">1년</label>
                                 </div>
                             </div>
                             <div class="dir-date-input">
@@ -552,7 +588,7 @@ function printSections(data) {
                                             </ul>
                                             <div class="date-range">
                                                 <%-- value: 0 ~ 4 / 0: day, 1: week..... --%>
-                                                <input type="range" class="rangeInput" value="0" id="date-01" min="0" max="4" />
+                                                <input type="range" class="rangeInput" name="filter_date" value="0" id="date-01" min="0" max="4" />
                                             </div>
                                         </div>
                                         <div class="total-search-detail__btn">
@@ -577,6 +613,9 @@ function printSections(data) {
                                         </div>
                                     </dd>
                                 </dl>
+                                <div id="aggregation">
+
+                                </div>
                             </div>
                             <div class="bottom-reset">
                                 <button type="button" class="btn-reset">전체 초기화</button>

@@ -4,6 +4,7 @@ import lombok.Data;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.Map;
 
 @Data
 public class SearchVO {
@@ -11,7 +12,7 @@ public class SearchVO {
     private String collapseCd;
     private String reSrchYn;
     private String[] prevKwd;
-    private String srchArea;
+    private String[] srchArea;
     private String[] attachedType;
     private int sort;
     private int size;
@@ -24,6 +25,7 @@ public class SearchVO {
 
     private String userId;
 
+    private Map<String, Object> filterOption;
 
     public SearchVO() {
         this.regDtmYn = "N";

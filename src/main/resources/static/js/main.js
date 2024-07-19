@@ -129,7 +129,7 @@ const buttonsEvent = () => {
     }
 }
 
-const rageInputEvent = () => {
+/*const rageInputEvent = () => {
     const rageInputs = document.querySelectorAll('.rangeInput');
 
     // 선택된 요소들에 이벤트 리스너 추가
@@ -139,6 +139,16 @@ const rageInputEvent = () => {
             event.target.style.background = 'linear-gradient(to right, #008CF1 0%, #008CF1 '+gradient_value * event.target.value +'%, #fff ' +gradient_value *  event.target.value + '%, #fff 100%)';
         });
     });
+}*/
+
+function effectRange(target) {
+    $.each(target, function(index, item) {
+        console.log(item.style);
+        const gradient_value = 100 / $(item).attr('max');
+        item.style.background = 'linear-gradient(to right, #008CF1 0%, #008CF1 '+gradient_value * $(item).val()
+            +'%, #fff ' +gradient_value * $(item).val() + '%, #fff 100%)';
+    })
+
 }
 
 document.addEventListener("DOMContentLoaded", function() {
@@ -152,7 +162,7 @@ document.addEventListener("DOMContentLoaded", function() {
 });
 
 window.onload=function(){
-    rageInputEvent();
+    /*rageInputEvent();*/
     resize();
     buttonsEvent();
     commonSearchTab();

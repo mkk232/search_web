@@ -5,9 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.net.ConnectException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Slf4j
 public class ConvertUtils {
@@ -17,6 +15,8 @@ public class ConvertUtils {
     @SuppressWarnings("unchecked")
     public static Map<String, Object> convertResultMap(Map<String, Object> apiResultMap) throws ConnectException {
         Map<String, Object> resultMap = (Map<String, Object>) apiResultMap.get("result");
+        Map<String, List<Object>> newAggregation = null;
+        List<Map<String, List<Object>>> newAggregationList = new ArrayList<>();
         if(resultMap != null) {
             if (Integer.parseInt(String.valueOf(resultMap.get("totalCnt"))) > 0) {
                 for (Map<String, Object> sectionMap : (List<Map<String, Object>>) resultMap.get("sectionList")) {
@@ -29,13 +29,24 @@ public class ConvertUtils {
 
                             addViewContent(docMap);
                         }
+
+//                        for(Map<String, Object> aggregationMap : (List<Map<String, Object>>) sectionMap.get("aggregations")) {
+//                            if(aggregationMap != null) {
+//                                newAggregation = getViewAggregation(newAggregation, aggregationMap);
+//                            }
+//                        }
                     }
                 }
+//                newAggregationList.add(newAggregation);
+//                resultMap.put("view_aggregations", newAggregationList);
+
             }
         } else {
             log.error("Search API connection error");
             throw new ConnectException("Search API connection error");
         }
+
+        System.out.println("apiResultMap = " + apiResultMap);
 
         return apiResultMap;
     }
@@ -69,18 +80,18 @@ public class ConvertUtils {
     }
 
     private static void addViewContent(Map<String, Object> docMap) {
-        String viewContent = (String) docMap.get("attach_body.highlight");
+        String viewContent = (String) docMap.get("content.highlight");
 
         if (viewContent == null) {
-            viewContent = (String) docMap.get("content.highlight");
-        }
-
-        if (viewContent == null) {
-            viewContent = (String) docMap.get("attach_body");
+            viewContent = (String) docMap.get("attach_body.highlight");
         }
 
         if (viewContent == null) {
             viewContent = (String) docMap.get("content");
+        }
+
+        if (viewContent == null) {
+            viewContent = (String) docMap.get("attach_body");
         }
 
         if (viewContent != null) {
@@ -90,4 +101,51 @@ public class ConvertUtils {
             log.warn("[{}] Content must be not null", docMap.get("title"));
         }
     }
+
+    @SuppressWarnings("unchecked")
+    private static Map<String, List<Object>> getViewAggregation(Map<String, List<Object>> newAggregationMap,
+                                                                Map<String, Object> aggregationMap) {
+        if(newAggregationMap == null) {
+            newAggregationMap = new HashMap<>();
+        }
+
+
+        String fieldName = (String) aggregationMap.get("field");
+        List<Object> bucketList = null;
+        if(newAggregationMap.containsKey(fieldName)) {
+            bucketList = newAggregationMap.get(fieldName);
+        } else {
+            bucketList = new ArrayList<>();
+        }
+
+
+        for(Map<String, Object> bucket : (List<Map<String, Object>>) aggregationMap.get("buckets")) {
+            String key = (String) bucket.get("key");
+            int docCnt = (int) bucket.get("doc_count");
+
+            if(bucketList.isEmpty()) {
+                Map<String, Object> bucketMap = new HashMap<>();
+                bucketMap.put(key, docCnt);
+                bucketList.add(bucketMap);
+            } else {
+                for (Object bucketMap : bucketList) {
+                    if (((Map<String, Object>) bucketMap).containsKey(key)) {
+                        int oldDocCnt = (int) ((Map<String, Object>) bucketMap).get(key);
+                        ((Map<String, Object>) bucketMap).put(key, docCnt + oldDocCnt);
+                    } else {
+                        ((Map<String, Object>) bucketMap).put(key, docCnt);
+                    }
+
+                }
+            }
+
+            newAggregationMap.put(fieldName, bucketList);
+        }
+
+        log.debug("newAggregationMap: {}", newAggregationMap);
+
+        return newAggregationMap;
+    }
 }
+
+
