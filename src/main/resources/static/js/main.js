@@ -61,6 +61,7 @@ const buttonsEvent = () => {
     const btnMoreLinkNext = document.querySelector('.btn-more-link.next');
     const btnMoreLinkPrev = document.querySelector('.btn-more-link.prev');
     const popularListContent = document.querySelector('.popular-list__content');
+    const enterdirectlyBtnPC = document.querySelector('.enterdirectly-btn__pc');
 
     if (btnSetting.length > 0) {
         btnSetting.forEach((input)=> {
@@ -127,9 +128,57 @@ const buttonsEvent = () => {
             });
         }
     }
-}
 
-/*const rageInputEvent = () => {
+    if (enterdirectlyBtnPC) {
+
+        const enterdirectlyBtnPC = document.querySelector('.enterdirectly-btn__pc');
+        const popup = document.querySelector('.popup-wrap__pc');
+        const totalWrap = document.querySelector('.total-wrap');
+        const btnClose = popup.querySelectorAll(".btn-close")
+
+        function showPopup(event) {
+            const rect = event.target.getBoundingClientRect();
+            const popupWidth = popup.offsetWidth;
+            const popupHeight = popup.offsetHeight;
+
+            let top = rect.top + window.scrollY + rect.height;
+            let left = rect.left + window.scrollX;
+
+            // Adjust position if popup overflows the window
+            if (left + popupWidth > window.innerWidth) {
+                left = window.innerWidth - popupWidth - 10;
+            }
+
+            if (top + popupHeight > window.innerHeight) {
+                top = rect.top + window.scrollY - popupHeight - 10;
+            }
+
+            popup.style.top = `${top + 5}px`;
+            popup.style.left = `${left}px`;
+            popup.style.display = 'block';
+        }
+
+        function hidePopup() {
+            popup.style.display = 'none';
+        }
+
+        enterdirectlyBtnPC.addEventListener('click', showPopup);
+        btnClose.forEach(item => {
+            item.addEventListener('click', hidePopup);
+        })
+
+        document.addEventListener('click', function(event) {
+            if (!popup.contains(event.target) && !event.target.matches('.enterdirectly-btn__pc')) {
+                hidePopup();
+            }
+        });
+
+        window.addEventListener('scroll', hidePopup);
+        totalWrap.addEventListener('scroll', hidePopup);
+    }
+}
+/*
+const rageInputEvent = () => {
     const rageInputs = document.querySelectorAll('.rangeInput');
 
     // 선택된 요소들에 이벤트 리스너 추가
@@ -141,16 +190,6 @@ const buttonsEvent = () => {
     });
 }*/
 
-function effectRange(target) {
-    $.each(target, function(index, item) {
-        console.log(item.style);
-        const gradient_value = 100 / $(item).attr('max');
-        item.style.background = 'linear-gradient(to right, #008CF1 0%, #008CF1 '+gradient_value * $(item).val()
-            +'%, #fff ' +gradient_value * $(item).val() + '%, #fff 100%)';
-    })
-
-}
-
 document.addEventListener("DOMContentLoaded", function() {
     var toggler = document.getElementsByClassName("caret");
     for (var i = 0; i < toggler.length; i++) {
@@ -161,10 +200,27 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 });
 
+/* 2024-07-19 rageInputEvent -> JQuery 대체 */
+function effectRange(target) {
+    $.each(target, function(index, item) {
+        const gradient_value = 100 / $(item).attr('max');
+        item.style.background = 'linear-gradient(to right, #008CF1 0%, #008CF1 '+gradient_value * $(item).val()
+            +'%, #fff ' +gradient_value * $(item).val() + '%, #fff 100%)';
+    })
+
+}
+
+/* 2024-07-22 상세검색 초기화 */
+function setInitDetail() {
+    $('input[name=detail_area][value=AREA01]').prop('checked', true);
+    $('input#detail_date-all').prop('checked', true);
+    $('input[name=detail_sort][value="10"]').prop('checked', true);
+    $('input[name=detail_file]').prop('checked', true);
+}
+
 window.onload=function(){
     /*rageInputEvent();*/
     resize();
     buttonsEvent();
     commonSearchTab();
-    tree();
 }

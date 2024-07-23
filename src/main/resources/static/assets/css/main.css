@@ -914,7 +914,7 @@ footer .search-form .box-setting__buttom {
   display: flex;
   justify-content: flex-start;
   align-items: center;
-  gap: 0 5px;
+  /*gap: 0 5px;*/
   text-decoration: underline;
   color: #333;
   font-size: 1.3rem;
@@ -950,7 +950,7 @@ footer .search-form .box-setting__buttom {
   background-size: 18px;
 }
 .file-download a.docx::before {
-  background: url("../images/icon/icon-ex.svg") no-repeat 0 0;
+  background: url("../images/icon/icon-word.svg") no-repeat 0 0;
   background-size: 18px;
 }
 
@@ -1946,6 +1946,7 @@ footer .search-form .box-setting__buttom {
     padding: 15px;
     background-color: #fff;
     border: 1px solid #ddd;
+    overflow-y: auto;
     /* Chrome, Safari, Edge */
   }
   .search-terms .total-wrap::-webkit-scrollbar {

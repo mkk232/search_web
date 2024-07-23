@@ -7,8 +7,9 @@
     <title>Rayful System</title>
     <link rel="stylesheet" href="../assets/css/main.css">
     <script src="/js/lib/jquery.min.3.7.1.js"></script>
-    <script defer src="/js/rayful-common-event.js"></script>
-    <script defer src="/js/rayful-print-section.js"></script>
+    <script defer src="/js/jquery-rayful-event.js"></script>
+    <script defer src="/js/jquery-rayful-paging.js"></script>
+    <script defer src="/js/jquery-rayful-print.js"></script>
 
 </head>
 <style>
@@ -55,7 +56,7 @@
             }
         })
 
-        $('input[id^=file], input[id^=year]').on('change', $('dl.files, dl.years'), function() {
+        $('input[id^=agg], input[id^=agg]').on('change', $('dl.files, dl.years'), function() {
             console.log('click')
             reqSearch();
         })
@@ -67,130 +68,132 @@
         })
 
         // 검색 API 호출
-        function reqSearch(e) {
-            let searchKeyword = $('.search-input').val();
 
-            if(e !== undefined) {
-                // trigger 요청
-                if(e.isTrigger === 3) {
-                    searchKeyword = $('input[name=kwd]').val();
-                }
-            }
-
-            if(searchKeyword.trim() == '') {
-                printNoKeyword();
-                return;
-            }
-
-            let sendData = {
-                kwd: searchKeyword,
-                // srchArea: [''],
-                collapseCd: $('div.total-menu ul li.on').data('searchCollapseCd'),
-                size: 10,
-                sort: $('input[name=detail_sort]:checked').val(),
-                page: 1,
-                reSrchYn: 'N',
-                prevKwd: [''],
-                period : $('div.date-range input[type=range]').val()
-            }
-
-            // TODO - 디자인 작업 후 수정 필요
-            // 검색 영역
-            let searchAreaList = [];
-            let checkedArea = $('input[name=detail_area]:checked').val();
-            searchAreaList.push(checkedArea);
-            sendData['srchArea'] = searchAreaList;
-
-            // 결과 내 재검색
-            if($('input#research').prop('checked')) {
-                if($('input[name=kwd]').val() != searchKeyword) {
-                    if($('input[name=prevKwd]').val() != '') {
-                        $('input[name=prevKwd]').val($('input[name=prevKwd]').val() + ',' +$('input[name=kwd]').val());
-                    } else {
-                        $('input[name=prevKwd]').val($('input[name=kwd]').val());
-                    }
-                }
-
-                $('input[name=kwd]').val($('input[name=prevKwd]').val());
-
-                sendData['reSrchYn'] = 'Y';
-
-                let prevKwdList = [];
-                $.each($('input[name=prevKwd]').val().split(","), function(index, item) {
-                    prevKwdList.push(item);
-                })
-
-                sendData['prevKwd'] = prevKwdList;
-            } else {
-                $('input[name=prevKwd]').val('');
-            }
-            $('input[name=kwd]').val(searchKeyword);
-
-            // 첨부파일
-            let attachList = [];
-            if(!($('input#file-all').prop('checked'))) {
-                $.each($('input[name=detail_file]:checked'), function(index, item) {
-                    attachList.push($(item).val());
-                })
-            }
-            sendData['attachedType'] = attachList;
-
-            // 필터 기간 직접입력 검색
-            if(e !== undefined ) {
-                if(e.target.className.includes('filter_period-search-btn')) {
-                    let endDtm = $('input[name=detail_date-self-end]').val();
-                    let startDtm = $('input[name=detail_date-self-start]').val();
-                    if (startDtm === '') {
-                        return;
-                    }
-                    sendData['regDtmYn'] = 'Y';
-                    sendData['regStartDtm'] = startDtm;
-                    sendData['regEndDtm'] = endDtm;
-                }
-            }
-
-            let filterOption = {};
-            $.each($('div#aggregation dl'), function(index, filter) {
-                let field = '';
-                let checkedValue = [];
-
-                console.log($(filter).find('input[type=checkbox]:checked').length);
-                if($(filter).find('input[type=checkbox]:checked').length > 0) {
-                    $.each($(filter).find('input[type=checkbox]:checked'), function(index, item) {
-                        field = $(item).closest('dl').data('name');
-                        checkedValue.push($(item).val());
-                    })
-                    filterOption[field] = checkedValue;
-                }
-            })
-
-            sendData['filterOption'] = filterOption
-
-            console.log(sendData);
-
-            let target = $('main.container section.content article');
-            target.empty();
-
-            $.ajax({
-                url: '/search.json',
-                type: 'POST',
-                data: JSON.stringify(sendData),
-                contentType: 'application/json; charset=utf-8',
-                timeout: 10000,
-                success: function(data) {
-                    printSections(target, data.result);
-                },
-                error: function (data, xhr, responseText) {
-                    if(data.responseText.status == 1) {
-
-                    }
-                }
-            })
-        }
 
     })
+function reqSearch(e) {
+    let target = $('main.container section.content article');
+    let searchKeyword = $('.search-input').val();
 
+    if(e !== undefined) {
+        // trigger 요청
+        if(e.isTrigger === 3) {
+            searchKeyword = $('input[name=kwd]').val();
+        }
 
+        if(e.target.className.includes('detail_search-btn')) {
+            setFilterCondition();
+        }
+    }
+
+    if(searchKeyword.trim() == '') {
+        printNoKeyword();
+        return;
+    }
+
+    let sendData = {
+        kwd: searchKeyword,
+        // srchArea: [''],
+        collapseCd: $('div.total-menu ul li.on').data('searchCollapseCd'),
+        size: 10,
+        sort: $('input[name=detail_sort]:checked').val(),
+        reSrchYn: 'N',
+        prevKwd: [''],
+        period : $('input[name=detail_date]:checked').val(),
+        page: $('button.btn-num.on').data('pageNo') ?  $('button.btn-num.on').data('pageNo') : 1
+    }
+
+    // TODO - 디자인 작업 후 수정 필요
+    // 검색 영역
+    let searchAreaList = [];
+    let checkedArea = $('input[name=detail_area]:checked').val();
+    searchAreaList.push(checkedArea);
+    sendData['srchArea'] = searchAreaList;
+
+    // 결과 내 재검색
+    if($('input#research').prop('checked')) {
+        if($('input[name=kwd]').val() != searchKeyword) {
+            if($('input[name=prevKwd]').val() != '') {
+                $('input[name=prevKwd]').val($('input[name=prevKwd]').val() + ',' +$('input[name=kwd]').val());
+            } else {
+                $('input[name=prevKwd]').val($('input[name=kwd]').val());
+            }
+        }
+
+        $('input[name=kwd]').val($('input[name=prevKwd]').val());
+
+        sendData['reSrchYn'] = 'Y';
+
+        let prevKwdList = [];
+        $.each($('input[name=prevKwd]').val().split(","), function(index, item) {
+            prevKwdList.push(item);
+        })
+
+        sendData['prevKwd'] = prevKwdList;
+    } else {
+        $('input[name=prevKwd]').val('');
+    }
+    $('input[name=kwd]').val(searchKeyword);
+
+    // 첨부파일
+    let attachList = [];
+    if(!($('input#file-all').prop('checked'))) {
+        $.each($('input[name=detail_file]:checked'), function(index, item) {
+            attachList.push($(item).val());
+        })
+    }
+    sendData['attachedType'] = attachList;
+
+    // 필터 기간 직접입력 검색
+    if(e !== undefined ) {
+        if(e.target.className.includes('filter_period-search-btn')) {
+            let endDtm = $('input[name=detail_date-self-end]').val();
+            let startDtm = $('input[name=detail_date-self-start]').val();
+            if (startDtm === '') {
+                return;
+            }
+            sendData['regDtmYn'] = 'Y';
+            sendData['regStartDtm'] = startDtm;
+            sendData['regEndDtm'] = endDtm;
+        }
+    }
+
+    let filterOption = {};
+    $.each($('div#aggregation dl'), function(index, filter) {
+        let field = '';
+        let checkedValue = [];
+
+        if($(filter).find('input[type=checkbox]:checked').length > 0) {
+            field = $(filter).data('name');
+            $.each($(filter).find('input[type=checkbox]:checked'), function(index, item) {
+                checkedValue.push($(item).val());
+            })
+            filterOption[field] = checkedValue;
+        }
+    })
+
+    sendData['filterOption'] = filterOption
+
+    console.log(sendData);
+
+    $.ajax({
+        url: '/search.json',
+        type: 'POST',
+        data: JSON.stringify(sendData),
+        contentType: 'application/json; charset=utf-8',
+        timeout: 10000,
+        success: function(data) {
+            target.empty();
+            printSections(target, data.result);
+
+        },
+        error: function (data, xhr, responseText) {
+            if(data.responseText.status == 1) {
+
+            }
+        }
+    })
+}
 
 // 자동완성 API 호출
 function reqAutoComplete() {
@@ -198,13 +201,14 @@ function reqAutoComplete() {
 }
 
 function printSections(target, data) {
-
     // Aggregation 초기화
     let aggTarget = $('div#aggregation');
     aggTarget.empty();
 
     if(data.result.totalCnt > 0) {
+
         printSearchInfo(target, data.result);
+
         $.each(data.result.sectionList, function(index, data) {
             if(data.sectionCnt > 0) {
                 if(data.sectionCode == 10000 && data.indexName == "idx_01_edms") {
@@ -216,15 +220,20 @@ function printSections(target, data) {
                 } else if(data.sectionCode == 50000 && data.indexName == "idx_03_people") {
                     printPeople(target, data);
                 }
-
             }
         })
 
-        printAggregation(aggTarget, data.result);
+        let currentTabCd = $('.total-menu ul li.on').data('searchCollapseCd');
+        if(currentTabCd != 99999) {
+            printAggregation(aggTarget, data.result);
+            printPagination(data.result.sectionList);
+        }
+
+
+
     } else {
         printNoResult(target, data.result);
     }
-    let currentTabCd = $('div.total-menu ul li.on').data('searchCollapseCd');
 
 
 }
@@ -245,6 +254,7 @@ function printSections(target, data) {
                         <input class="search-input" type="text" value=""/>
                         <input type="hidden" name="kwd" />
                         <input type="hidden" name="prevKwd" />
+                        <input type="hidden" name="selectedPage" />
                         <button type="button" class="btn-setting">검색 세팅</button>
 
                     <!-- 자동완성 -->
@@ -420,7 +430,7 @@ function printSections(target, data) {
                         </dd>
                     </dl>
                     <div class="btn-area">
-                        <button class="btn__blue--search search-btn">검색</button>
+                        <button class="btn__blue--search search-btn detail_search-btn">검색</button>
                         <button class="btn__navy--reset btn-detail-reset">초기화</button>
                         <button class="btn__darkgray--close btn-detail-close">취소</button>
                     </div>
@@ -502,24 +512,24 @@ function printSections(target, data) {
                                     <span>통합검색</span>
                                 </button>
                             </li>
-                            <li data-search-collapse-cd="10000">
-                                <button type="button" class="icon04">
+<%--                            <li data-search-collapse-cd="10000">
+                                <button type="button" class="icon02">
                                     <span>문서관리</span>
                                 </button>
-                            </li>
+                            </li>--%>
                             <li data-search-collapse-cd="20000">
-                                <button type="button" class="icon04">
+                                <button type="button" class="icon02">
                                     <span>전자결재</span>
                                 </button>
                             </li>
                             <li data-search-collapse-cd="40000">
-                                <button type="button" class="icon04">
-                                    <span>사규</span>
+                                <button type="button" class="icon03">
+                                    <span>규정관리</span>
                                 </button>
                             </li>
                             <li data-search-collapse-cd="50000">
-                                <button type="button" class="icon02">
-                                    <span>직원검색</span>
+                                <button type="button" class="icon04">
+                                    <span>조직</span>
                                 </button>
                             </li>
                             <%--
@@ -592,8 +602,8 @@ function printSections(target, data) {
                                             </div>
                                         </div>
                                         <div class="total-search-detail__btn">
-                                            <button class="btn">직접입력</button>
-                                            <div class="popup-wrap" style="top: 35px;">
+                                            <button class="btn enterdirectly-btn__pc">직접입력</button>
+                                            <%--<div class="popup-wrap" style="top: 35px;">
                                                 <button type="button" class="btn-icon__close2 filter_period-close-btn">닫기</button>
                                                 <div class="header">
                                                     <h2>기간</h2>
@@ -609,7 +619,7 @@ function printSections(target, data) {
                                                     <button class="btn__blue--search filter_period-search-btn">검색</button>
                                                     <button class="btn__darkgray--close filter_period-close-btn">닫기</button>
                                                 </div>
-                                            </div>
+                                            </div>--%>
                                         </div>
                                     </dd>
                                 </dl>
@@ -617,9 +627,9 @@ function printSections(target, data) {
 
                                 </div>
                             </div>
-                            <div class="bottom-reset">
+                            <%--<div class="bottom-reset">
                                 <button type="button" class="btn-reset">전체 초기화</button>
-                            </div>
+                            </div>--%>
                         </div>
                     </div>
                     <!-- PC 버전 Filter -->
@@ -795,183 +805,8 @@ function printSections(target, data) {
         <main class="container">
             <section class="content">
                 <article>
-                    <div class="tit-box result-box" style="display: none;">
-                        <h2 class="total-tit">
-                            <strong class="txt-keyword">키워드</strong> 에 대한 검색 결과
-                        </h2>
-                        <p class="total-tit__info">
-                            <strong class="txt-total">총 <span class="num">143</span>건</strong> (pdf 1건 / doc 100건 / xls 12건 )
-                        </p>
-                    </div>
-
-                    <div class="box-area" style="display: none;">
-                        <div class="box-area__tit">
-                            <h2 class="box-tit">
-                                사이트 
-                                <button type="button" class="btn-info">정보</button>
-                                <div class="popup-wrap" style="display: none;">
-                                    <button type="button" class="btn-icon__close2">닫기</button>
-                                    <section class="txt-wrap">
-                                        <p class="txt">카테고리에 대한 설명입니다. 카테고리에 대한 설명입니다.카테고리에 대한 설명입니다.</p>
-                                    </section>
-                                </div>
-                            </h2>
-                            <a href="#" class="btn-icon-text__more">사이트 더보기</a>
-                        </div>
-                        <div class="box-area__content">
-                            <ul class="result-list">
-                                <li><span class="dot">&#183;</span> 회사 &#62; IT 기업 &#62; <a href="#">레이풀 시스템</a></li>
-                                <li><span class="dot">&#183;</span> 회사 &#62; 사람인 &#62; IT 기업 &#62; <a href="#">레이풀 시스템</a></li>
-                                <li><span class="dot">&#183;</span> 회사 &#62; IT 기업 &#62; <a href="#">레이풀 시스템</a></li>
-                                <li><span class="dot">&#183;</span> 회사 &#62; IT 기업 &#62; <a href="#">레이풀 시스템</a></li>
-                                <li><span class="dot">&#183;</span> 회사 &#62; 사람인 &#62; IT 기업 &#62; <a href="#">레이풀 시스템</a></li>
-                                <li><span class="dot">&#183;</span> 회사 &#62; IT 기업 &#62; <a href="#">레이풀 시스템</a></li>
-                            </ul>
-
-                            <div class="search-result-box">
-                                <div class="item">
-                                    <h3><a class="color-third" href="#">레이풀 시스템</a> <a href="#">www.rayful.com</a></h3>
-                                    <p class="txt">검색된 정보의 내용을 보여줍니다. 내용 줄수는2줄을 기본으로 합니다. 검색된 정보의 내용을 보여줍니다. 내용 줄수는2줄을 기본으로 합니...</p>
-                                    <p class="result-list__item"><span class="dot">&#183;</span> 회사  &#62; IT 기업 &#62; 영림원소프트</p>
-                                </div>
-                                <div class="item">
-                                    <h3><a class="color-third" href="#">레이풀 시스템</a> <a href="#">www.rayful.com</a></h3>
-                                    <p class="txt">검색된 정보의 내용을 보여줍니다. 내용 줄수는2줄을 기본으로 합니다. 검색된 정보의 내용을 보여줍니다. 내용 줄수는2줄을 기본으로 합니...</p>
-                                    <p class="result-list__item"><span class="dot">&#183;</span> 회사  &#62; IT 기업 &#62; 영림원소프트</p>
-                                </div>
-                                <div class="item">
-                                    <h3><a class="color-third" href="#">레이풀 시스템</a> <a href="#">www.rayful.com</a></h3>
-                                    <p class="txt">검색된 정보의 내용을 보여줍니다. 내용 줄수는2줄을 기본으로 합니다. 검색된 정보의 내용을 보여줍니다. 내용 줄수는2줄을 기본으로 합니...</p>
-                                    <p class="result-list__item"><span class="dot">&#183;</span> 회사  &#62; IT 기업 &#62; 영림원소프트</p>
-                                </div>
-                            </div>
-                            <div class="more-info-area">
-                                <a href="#" class="btn-icon-text__more">문서관리 더보기</a>
-                            </div>
-                        </div>
-                    </div>
 
 
-
-                    <div class="box-area" style="display: none;">
-                        <div class="box-area__tit">
-                            <h2 class="box-tit">
-                                문서관리 
-                                <button type="button" class="btn-info">정보</button>
-                                <div class="popup-wrap">
-                                    <button type="button" class="btn-icon__close2">닫기</button>
-                                    <section class="txt-wrap">
-                                        <p class="txt">카테고리에 대한 설명입니다. 카테고리에 대한 설명입니다.카테고리에 대한 설명입니다.</p>
-                                    </section>
-                                </div>
-                            </h2>
-                            <a href="#" class="btn-icon-text__more">문서관리 더보기</a>
-                        </div>
-                        <div class="box-area__content">
-                            <div class="doc-result-box">
-                                <div class="item">
-                                    <h3>
-                                        <strong><a class="color-third" href="#">&#91;문서 일반&#93; 컨텐츠 제목</a></strong>
-                                        <span>자료실 &#62; 문서 일반</span>
-                                    </h3>
-                                    <p class="txt">검색된 정보의 내용을 보여줍니다. 내용 줄수는3줄을 기본으로 합니다. 키워드는 볼드 처리합니다. 3줄을 넘을 때는 ... 처리합니다. 검색된 정보의 내용을 보여줍니다. 내용 줄수는3줄을 기본으로 합니다. 키워드는 볼드 처리합니다. 3...</p>
-                                    <div class="file-download">
-                                        <a href="#" class="doc">첨부문서.doc</a>
-                                        <button type="button" class="btn-icon__preview on">파일 찾기</button>
-                                    </div>
-                                    <div class="file-wrap on">
-                                        <p>첨부파일의 내용을 텍스트로 보여줍니다. 첨부파일의 내용을 텍스트로 보여줍니다.첨부파일의 내용을 보여줍니다.</p>
-                                        <div class="file-control">
-                                            <strong>저작권 정보</strong>
-                                            <button type="button" class="btn-icon-text__download">다운로드</button>
-                                            <button type="button" class="btn-icon-text__close btn-preview-close">닫기</button>
-                                        </div>
-                                    </div>
-                                    <p class="text-date">
-                                        홍길동<b>&#124;</b>2024.12.12
-                                    </p>
-                                </div>
-                                <div class="item">
-                                    <h3>
-                                        <strong><a class="color-third" href="#">&#91;문서 일반&#93; 컨텐츠 제목</a></strong>
-                                        <span>자료실 &#62; 문서 일반</span>
-                                    </h3>
-                                    <p class="txt">검색된 정보의 내용을 보여줍니다. 내용 줄수는3줄을 기본으로 합니다. 키워드는 볼드 처리합니다. 3줄을 넘을 때는 ... 처리합니다. 검색된 정보의 내용을 보여줍니다. 내용 줄수는3줄을 기본으로 합니다. 키워드는 볼드 처리합니다. 3...</p>
-                                    <div class="file-download">
-                                        <a href="#" class="pptx">첨부문서.pptx</a>
-                                        <button type="button" class="btn-icon__preview">파일 찾기</button>
-                                    </div>
-                                    <div class="file-wrap">
-                                        <p>첨부파일의 내용을 텍스트로 보여줍니다. 첨부파일의 내용을 텍스트로 보여줍니다.첨부파일의 내용을 보여줍니다.</p>
-                                        <div class="file-control">
-                                            <strong>저작권 정보</strong>
-                                            <button type="button" class="btn-icon-text__download">다운로드</button>
-                                            <button type="button" class="btn-icon-text__close btn-preview-close">닫기</button>
-                                        </div>
-                                    </div>
-                                    <p class="text-date">
-                                        홍길동<b>&#124;</b>복지부<b>&#124;</b>2024.12.12
-                                    </p>
-                                </div>
-                            </div>
-                            <div class="more-info-area">
-                                <a href="#" class="btn-icon-text__more">문서관리 더보기</a>
-                            </div>
-                        </div>
-                    </div>
-
-
-                    <div class="box-area" style="display: none;">
-                        <div class="box-area__tit">
-                            <h2 class="box-tit">
-                                포털 검색 
-                                <button type="button" class="btn-info on">정보</button>
-                                <div class="popup-wrap" style="display: none;">
-                                    <button type="button" class="btn-icon__close2">닫기</button>
-                                    <section class="txt-wrap">
-                                        <p class="txt">카테고리에 대한 설명입니다. 카테고리에 대한 설명입니다.카테고리에 대한 설명입니다.</p>
-                                    </section>
-                                </div>
-                            </h2>
-                        </div>
-                        <div class="box-area__content">
-                            <div class="portal-result-box">
-                                <div class="item">
-                                    <div class="portal">
-                                        <div class="portal__thumnail">
-
-                                        </div>
-                                        <div class="portal__content">
-                                            <h3>
-                                                <strong><a class="color-third" href="#">컨텐츠 제목</a></strong>
-                                                <a href="#" class="btn-icon-text__more">관련기사 보기</a>
-                                            </h3>
-                                            <p class="txt">검색된 정보의 내용을 보여줍니다. 내용 줄수는3줄을 기본으로 합니다. 키워드는 볼드 처리합니다. 3줄을 넘을 때는 ... 처리합니다. 검색된 정보의 내용을 보여...</p>    
-                                        </div>
-                                        
-                                    </div>
-                                    <p class="text-date">
-                                        네이버 뉴스<b>&#124;</b>2024.12.12 12:50
-                                    </p>
-                                </div>
-                                <div class="item">
-                                    <div class="portal">
-                                        <div class="portal__content">
-                                            <h3>
-                                                <strong><a class="color-third" href="#">컨텐츠 제목</a></strong>
-                                                <a href="#" class="btn-icon-text__more">관련기사 보기</a>
-                                            </h3>
-                                            <p class="txt">검색된 정보의 내용을 보여줍니다. 내용 줄수는3줄을 기본으로 합니다. 키워드는 볼드 처리합니다. 3줄을 넘을 때는 ... 처리합니다. 검색된 정보의 내용을 보여...</p>    
-                                        </div>
-                                        
-                                    </div>
-                                    <p class="text-date">
-                                        네이버 뉴스<b>&#124;</b>2024.12.12 12:50
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
                 </article>
             </section>
         </main>
@@ -981,7 +816,7 @@ function printSections(target, data) {
             <div class="inner">
                 <div class="search-form">
                     <div class="input-control">
-                        <input type="text" />
+                        <input type="text" class="search-input"/>
                         <button type="button" class="btn-setting">검색 세팅</button>
 
                         <!-- 검색 box -->
@@ -1026,12 +861,32 @@ function printSections(target, data) {
                             </ul>
                         </div>
 
-                        <button type="button" class="btn-icon__search">검색</button>
+                        <button type="button" class="btn-icon__search search-btn">검색</button>
                     </div>
                 </div>
                 <p class="copy">© Rayful System 2024. All rights reserved.</p>
             </div>
         </footer>
+
+        <!-- 2024-07-21 수정-->
+        <div class="popup-wrap popup-wrap__pc">
+            <button type="button" class="btn-icon__close2 btn-close filter_period-close-btn">닫기</button>
+            <div class="header">
+                <h2>기간</h2>
+            </div>
+            <section>
+                <div class="date-picker__period">
+                    <input type="date" name="filter_date-self-start" />
+                    <span class="dash">~</span>
+                    <input type="date" name="filter_date-self-end" />
+                </div>
+            </section>
+            <div class="btn-area">
+                <button class="btn__blue--search filter_period-search-btn">검색</button>
+                <button class="btn__darkgray--close btn-close">닫기</button>
+            </div>
+        </div>
+        <!-- // 2024-07-21 수정-->
     </div>
 </body>
 <script defer src="../js/main.js" >

@@ -13,7 +13,9 @@ $('.btn-detail-close').on('click', function() {
     if(detailModal.hasClass('on')) {
         detailModal.removeClass('on');
         detailModal.addClass('off');
+        setInitDetail();
     }
+
 })
 
 // 기간 직접입력 Modal 열기/닫기 이벤트
@@ -29,39 +31,25 @@ $('div.total-search-detail__btn button.btn, button.filter_period-close-btn').on(
 })
 
 // 상세검색 - Filter 정렬 클릭 이벤트
-$('input[name=filter_sort], input[name=detail_sort]').on('change', function(e) {
+$('input[name=filter_sort]').on('change', function(e) {
     let checkedValue;
-    if(e.target.name.startsWith('detail_')) {
-        checkedValue = $('input[name=detail_sort]:checked').val();
-        $('input[name=filter_sort][value=' + checkedValue + ']').prop('checked', true);
-    } else if(e.target.name.startsWith('filter_')) {
-        checkedValue = $('input[name=filter_sort]:checked').val();
-        $('input[name=detail_sort][value=' + checkedValue + ']').prop('checked', true);
-    }
+    checkedValue = $('input[name=filter_sort]:checked').val();
+    $('input[name=detail_sort][value=' + checkedValue + ']').prop('checked', true);
 })
 
 // 상세검색 - Filter 검색 영역 클릭 이벤트
-$('input[name=filter_area], input[name=detail_area]').on('change', function(e) {
+$('input[name=filter_area]').on('change', function(e) {
     let checkedValue;
-    if(e.target.name.startsWith('detail_')) {
-        checkedValue = $('input[name=detail_area]:checked').val();
-        $('input[name=filter_area]').prop('checked', false);
-        $('input[name=filter_area][value=' + checkedValue + ']').prop('checked', true);
-    } else if(e.target.name.startsWith('filter_')) {
-        checkedValue = $('input[name=filter_area]:checked').val();
-        $('input[name=detail_area][value=' + checkedValue + ']').prop('checked', true);
-    }
+    checkedValue = $('input[name=filter_area]:checked').val();
+    $('input[name=detail_area][value=' + checkedValue + ']').prop('checked', true);
 })
 
 // 상세검색 - Filter 기간 클릭 이벤트
-$('input[name$=_date]').on('change', function(e) {
+$('input[name=filter_date]').on('change', function(e) {
     let checkedDateValue = $(this).val();
-    if(e.target.name.startsWith('detail_')) {
-        $('input[type=range].rangeInput').val(checkedDateValue);
-        effectRange($('input[type=range].rangeInput'));
-    } else if(e.target.name.startsWith('filter_')) {
-        $('input[name=detail_date]').val(checkedDateValue);
-    }
+
+    $('input[name=detail_date][value="'+ checkedDateValue +'"]').prop('checked', true);
+
 })
 
 // 상세검색 - Filter 기간 직접입력 이벤트
@@ -131,8 +119,43 @@ $(document).off().on('click', '.btn-icon-text__more' ,function() {
 
     $('div.total-menu ul li.on').removeClass('on');
     $('div.total-menu ul li[data-search-collapse-cd='+ $(this).data('searchCollapseCd') +']').trigger('click');
-    // $('div.search-form .search-btn').trigger('click');
 })
+
+// 페이징 클릭 이벤트
+$(document).on('click', 'div.paging-wrap button', function() {
+    let selectedNo = $(this).data('pageNo');
+    console.log(selectedNo);
+
+    $('button.btn-num').removeClass('on');
+    if(!$(this).hasClass('btn-next')) {
+        $(this).addClass('on');
+
+    }
+    $('input[name=selectedPage]').val(selectedNo);
+    reqSearch();
+})
+
+function setFilterCondition() {
+    // area
+    let detailAreaValue = $('input[name=detail_area]:checked').val();
+    $('input[name=filter_area][value="'+  detailAreaValue +'"]').prop('checked', true);
+
+    // sort
+    let detailSortValue = $('input[name=detail_sort]:checked').val();
+    $('input[name=filter_sort][value="' +detailSortValue+ '"]').prop('checked', true);
+
+    // date
+    let detailDateValue = $('input[name=detail_date]:checked').val();
+    $('input[name=filter_date]').val(detailDateValue);
+    effectRange($('input[name=filter_date]'));
+
+}
+
+// 상세검색 초기화 버튼 클릭 이벤트
+$('div.box-detail div.btn-area button.btn-detail-reset').on('click', function() {
+    setInitDetail();
+})
+
 
 // 첨부파일 미리보기 이벤트
 /*

@@ -29,17 +29,8 @@ public class ConvertUtils {
 
                             addViewContent(docMap);
                         }
-
-//                        for(Map<String, Object> aggregationMap : (List<Map<String, Object>>) sectionMap.get("aggregations")) {
-//                            if(aggregationMap != null) {
-//                                newAggregation = getViewAggregation(newAggregation, aggregationMap);
-//                            }
-//                        }
                     }
                 }
-//                newAggregationList.add(newAggregation);
-//                resultMap.put("view_aggregations", newAggregationList);
-
             }
         } else {
             log.error("Search API connection error");
@@ -82,24 +73,25 @@ public class ConvertUtils {
     private static void addViewContent(Map<String, Object> docMap) {
         String viewContent = (String) docMap.get("content.highlight");
 
-        if (viewContent == null) {
+        if (viewContent == null || viewContent.isEmpty()) {
             viewContent = (String) docMap.get("attach_body.highlight");
         }
 
-        if (viewContent == null) {
+        if (viewContent == null || viewContent.isEmpty()) {
             viewContent = (String) docMap.get("content");
         }
 
-        if (viewContent == null) {
+        if (viewContent == null || viewContent.isEmpty()) {
             viewContent = (String) docMap.get("attach_body");
         }
 
-        if (viewContent != null) {
-            docMap.put("view_content", viewContent);
-        } else {
-            docMap.put("view_content", "");
+        if (viewContent == null || viewContent.isEmpty()) {
+            viewContent = "";
             log.warn("[{}] Content must be not null", docMap.get("title"));
         }
+
+        docMap.put("view_content", viewContent);
+
     }
 
     @SuppressWarnings("unchecked")

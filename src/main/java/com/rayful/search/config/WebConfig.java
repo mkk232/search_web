@@ -31,7 +31,7 @@ public class WebConfig implements WebMvcConfigurer {
 //    private int timeout;
 
     @Bean
-    public WebClient getWebClient(/*@Value("${elasticsearch.host}") String baseUrl*/) {
+    public WebClient getWebClient(@Value("${searchapi.host}") String baseUrl) {
         HttpClient httpClient = HttpClient.create()
                 .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 5000)
                 .responseTimeout(Duration.ofMillis(5000))
@@ -40,7 +40,7 @@ public class WebConfig implements WebMvcConfigurer {
                                 .addHandlerLast(new WriteTimeoutHandler(5000, TimeUnit.MILLISECONDS)));
 
         WebClient client = WebClient.builder()
-                .baseUrl("http://192.168.10.169:8002/api/search")
+                .baseUrl(baseUrl)
                 .exchangeStrategies(ExchangeStrategies.builder()
                         .codecs(configurer -> configurer.defaultCodecs()
                                 .maxInMemorySize(100 * 1024 * 1024)) // 버퍼 사이즈 100MB
