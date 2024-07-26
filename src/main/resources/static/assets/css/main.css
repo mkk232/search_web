@@ -146,8 +146,8 @@ header .head-info .logo {
   overflow: hidden;
   width: 68px;
   height: 25px;
-  background: url("../images/common/logo_mobile.svg") no-repeat 0 0;
-  background-size: 100%;
+  background: url("../images/common/pha_logo.png") no-repeat 0 0;
+  background-size: 85%;
 }
 @media only screen and (min-width: 768px) {
   header .head-info .logo {
@@ -914,7 +914,7 @@ footer .search-form .box-setting__buttom {
   display: flex;
   justify-content: flex-start;
   align-items: center;
-  /*gap: 0 5px;*/
+  /*gap: 0 5px; 2024-07-19 하이라이팅 처리로 인해 제거 */
   text-decoration: underline;
   color: #333;
   font-size: 1.3rem;
@@ -945,6 +945,11 @@ footer .search-form .box-setting__buttom {
   background: url("../images/icon/icon-document.svg") no-repeat 0 0;
   background-size: 18px;
 }
+.file-download a.psd::before {
+  background: url("../images/icon/icon-psd.svg") no-repeat 0 0;
+  background-size: 18px;
+}
+
 .file-download a.xlsx::before {
   background: url("../images/icon/icon-ex.svg") no-repeat 0 0;
   background-size: 18px;
@@ -996,6 +1001,44 @@ footer .search-form .box-setting__buttom {
 }
 .select-control select:hover:not([disabled]), .select-control select:focus:not([disabled]) {
   box-shadow: 4px 4px 4px rgba(0, 0, 0, 0.1);
+}
+
+.select-box-area button {
+  background: url("../images/icon/icon_related_arrow.svg") no-repeat top 50% right 10px;
+  background-size: 10px 6px;
+  width: 100%;
+  height: 30px;
+  padding: 0 10px;
+  border-radius: 4px;
+  border: 1px solid #DDDDDD;
+  color: #333;
+  font-size: 1.3rem;
+  background-color: #fff;
+  outline: none;
+  appearance: none;
+  text-align: left;
+}
+.select-box-area button:disabled {
+  color: #919191;
+  background-color: #F2F4F7;
+}
+.on + .select-box-area__content {
+  display: block;
+}
+.select-box-area__content {
+  display: none;
+  position: relative;
+  background-color: #fff;
+  padding: 10px;
+  border: 1px solid #DDDDDD;
+  z-index: 1;
+  top: -2px;
+}
+.select-box-area__content ul li {
+  margin-bottom: 10px;
+}
+.select-box-area__content ul li:last-child {
+  margin-bottom: 0px;
 }
 
 .date-picker input[type=date] {

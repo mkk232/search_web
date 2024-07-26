@@ -8,7 +8,7 @@ spring:
       suffix: .jsp
 
 searchapi:
-  host: http://122.199.202.101:8002/api/search
+  host: http://sch.phakr.com:8002/api/search
 
 
 # jsp config

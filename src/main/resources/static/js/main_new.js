@@ -77,7 +77,7 @@ const buttonsEvent = () => {
         })
     }
 
-    /*if (btnDetailSearch) {
+    if (btnDetailSearch) {
         btnDetailSearch.addEventListener('click', () => {
             if (btnDetailSearch.classList.contains('on')) {
                 btnDetailSearch.classList.remove('on');
@@ -85,7 +85,7 @@ const buttonsEvent = () => {
                 btnDetailSearch.classList.add('on');
             }
         })
-    }*/
+    }
 
     if (btnRelated) {
         btnRelated.addEventListener('click', () => {
@@ -132,12 +132,12 @@ const buttonsEvent = () => {
     }
 
     if (enterdirectlyBtnPC) {
-
+        
         const enterdirectlyBtnPC = document.querySelector('.enterdirectly-btn__pc');
         const popup = document.querySelector('.popup-wrap__pc');
         const totalWrap = document.querySelector('.total-wrap');
         const btnClose = popup.querySelectorAll(".btn-close")
-
+        
         function showPopup(event) {
             const rect = event.target.getBoundingClientRect();
             const popupWidth = popup.offsetWidth;
@@ -163,7 +163,7 @@ const buttonsEvent = () => {
         function hidePopup() {
             popup.style.display = 'none';
         }
-
+     
         enterdirectlyBtnPC.addEventListener('click', showPopup);
         btnClose.forEach(item => {
             item.addEventListener('click', hidePopup);
@@ -192,20 +192,6 @@ const buttonsEvent = () => {
     }
 }
 
-document.addEventListener("DOMContentLoaded", function() {
-    var toggler = document.getElementsByClassName("caret");
-    for (var i = 0; i < toggler.length; i++) {
-        toggler[i].addEventListener("click", function() {
-            this.parentElement.querySelector(".nested").classList.toggle("active");
-            this.classList.toggle("caret-down");
-        });
-    }
-});
-
-
-
-
-/* 2024-07-19 rageInputEvent -> JQuery effectRange 변경
 const rageInputEvent = () => {
     const rageInputs = document.querySelectorAll('.rangeInput');
 
@@ -216,11 +202,20 @@ const rageInputEvent = () => {
             event.target.style.background = 'linear-gradient(to right, #008CF1 0%, #008CF1 '+gradient_value * event.target.value +'%, #fff ' +gradient_value *  event.target.value + '%, #fff 100%)';
         });
     });
-}*/
+}
 
+document.addEventListener("DOMContentLoaded", function() {
+    var toggler = document.getElementsByClassName("caret");
+    for (var i = 0; i < toggler.length; i++) {
+        toggler[i].addEventListener("click", function() {
+            this.parentElement.querySelector(".nested").classList.toggle("active");
+            this.classList.toggle("caret-down");
+        });
+    }
+});
 
 window.onload=function(){
-    /*rageInputEvent();*/
+    rageInputEvent();
     resize();
     buttonsEvent();
     commonSearchTab();

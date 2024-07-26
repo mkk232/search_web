@@ -49,7 +49,7 @@ function reqSearch() {
         srchArea: $('input[name=detail_area]').val(),
         collapseCd: $('div.total-menu ul li.on').data('searchCollapseCd'),
         size: 10,
-        sort: $('input[name=detail_sort]:checked').val(),
+        sort: $('input[name=detail_sort-group]:checked').val(),
         page: 1
     }
 

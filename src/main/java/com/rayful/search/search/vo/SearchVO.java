@@ -24,10 +24,13 @@ public class SearchVO {
     private String regEndDtm;
 
     private String userId;
+    private String[] acl01;
 
     private Map<String, Object> filterOption;
 
     public SearchVO() {
+        this.collapseCd = "99999";
+        this.prevKwd = new String[0];
         this.regDtmYn = "N";
     }
 
@@ -61,4 +64,8 @@ public class SearchVO {
         }
     }
 
+    public void setUserInfo(String userNameList) {
+        this.acl01 = userNameList.split(", ");
+        this.userId = this.acl01[0];
+    }
 }

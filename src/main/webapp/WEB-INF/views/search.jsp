@@ -1,4 +1,5 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,6 +8,7 @@
     <title>Rayful System</title>
     <link rel="stylesheet" href="../assets/css/main.css">
     <script src="/js/lib/jquery.min.3.7.1.js"></script>
+    <script defer src="/js/jquery-rayful-common.js"></script>
     <script defer src="/js/jquery-rayful-event.js"></script>
     <script defer src="/js/jquery-rayful-paging.js"></script>
     <script defer src="/js/jquery-rayful-print.js"></script>
@@ -24,53 +26,37 @@
         -webkit-box-orient: vertical;
         -webkit-line-clamp: 3;
     }
+
+    div.staff-area {
+        padding: 20px;
+    }
 </style>
 
 <script type="text/javascript">
+    <%--let query = '<c:out value="${q}" />';--%>
     $(document).ready(function() {
+
+        // 페이지 로드 시 필터 기간 Range 영역 초기 세팅
         $('input[type=range].rangeInput').on('change', function(event) {
             $('input[type=range].rangeInput').val(event.target.value);
             effectRange($('input[type=range].rangeInput'));
          })
 
-        // TODO - 페이지 로드 시 기간 range 설정 필요
         $('input[type=range].rangeInput').val(4);
         effectRange($('input[type=range].rangeInput'));
 
         // TODO - 배포 시 삭제
         reqSearch();
 
-        // 검색 아이콘 클릭 이벤트
-        $(document).on('click', '.search-btn', function(e) {
-            reqSearch(e);
-            $('button.btn-detail-close').trigger('click');
-        })
 
-        // 검색창 엔터 이벤트
-        $('.search-input').on('keyup', function(key) {
-            // reqAutoComplete();
-
-            if(key.keyCode == 13) {
-                reqSearch();
-                $('button.btn-detail-close').trigger('click');
-            }
-        })
-
-        $('input[id^=agg], input[id^=agg]').on('change', $('dl.files, dl.years'), function() {
-            console.log('click')
-            reqSearch();
-        })
-
-        // Filter - 기간 직접입력 검색 이벤트
-        $('button.filter_period-search-btn').on('click', function(e) {
-            $('button.filter_period-close-btn.btn__darkgray--close').trigger('click');
-            reqSearch(e);
-        })
-
-        // 검색 API 호출
-
+        // TODO 삭제 여부 판단 필요
+        // $('input[name^=agg]').on('change', $('dl.files, dl.years'), function() {
+        //     console.log('click')
+        //     reqSearch();
+        // })
 
     })
+
 function reqSearch(e) {
     let target = $('main.container section.content article');
     let searchKeyword = $('.search-input').val();
@@ -86,38 +72,42 @@ function reqSearch(e) {
         }
     }
 
-    if(searchKeyword.trim() == '') {
+    if(searchKeyword.trim().length == 0) {
         printNoKeyword();
         return;
     }
 
     let sendData = {
         kwd: searchKeyword,
-        // srchArea: [''],
+        prevKwd: [''],
+        srchArea: [''],
         collapseCd: $('div.total-menu ul li.on').data('searchCollapseCd'),
         size: 10,
         sort: $('input[name=detail_sort]:checked').val(),
         reSrchYn: 'N',
-        prevKwd: [''],
         period : $('input[name=detail_date]:checked').val(),
-        page: $('button.btn-num.on').data('pageNo') ?  $('button.btn-num.on').data('pageNo') : 1
+        // page: $('button.btn-num.on').data('pageNo') ?  $('button.btn-num.on').data('pageNo') : 1
+        page: $('input[name=selectedPage]').val() ? $('input[name=selectedPage]').val() : 1
     }
 
     // TODO - 디자인 작업 후 수정 필요
     // 검색 영역
     let searchAreaList = [];
-    let checkedArea = $('input[name=detail_area]:checked').val();
-    searchAreaList.push(checkedArea);
+    if(!$('input[id=filter_area-all]').prop('checked')) {
+        $.each($('input[name=filter_area]:checked'), function(index, item) {
+            searchAreaList.push($(item).val());
+        })
+    } else {
+        searchAreaList.push($('input[id=filter_area-all]').val());
+    }
     sendData['srchArea'] = searchAreaList;
 
     // 결과 내 재검색
     if($('input#research').prop('checked')) {
-        if($('input[name=kwd]').val() != searchKeyword) {
-            if($('input[name=prevKwd]').val() != '') {
-                $('input[name=prevKwd]').val($('input[name=prevKwd]').val() + ',' +$('input[name=kwd]').val());
-            } else {
-                $('input[name=prevKwd]').val($('input[name=kwd]').val());
-            }
+        if($('input[name=prevKwd]').val() != '') {
+            $('input[name=prevKwd]').val($('input[name=prevKwd]').val() + ',' +$('input[name=kwd]').val());
+        } else {
+            $('input[name=prevKwd]').val($('input[name=kwd]').val());
         }
 
         $('input[name=kwd]').val($('input[name=prevKwd]').val());
@@ -130,14 +120,16 @@ function reqSearch(e) {
         })
 
         sendData['prevKwd'] = prevKwdList;
+
     } else {
         $('input[name=prevKwd]').val('');
     }
     $('input[name=kwd]').val(searchKeyword);
 
-    // 첨부파일
+
+    // 상세검색 내 첨부파일
     let attachList = [];
-    if(!($('input#file-all').prop('checked'))) {
+    if(!($('input#detail_file-all').prop('checked'))) {
         $.each($('input[name=detail_file]:checked'), function(index, item) {
             attachList.push($(item).val());
         })
@@ -158,6 +150,7 @@ function reqSearch(e) {
         }
     }
 
+    /* Aggregation 파라미터 설정 */
     let filterOption = {};
     $.each($('div#aggregation dl'), function(index, filter) {
         let field = '';
@@ -183,13 +176,20 @@ function reqSearch(e) {
         contentType: 'application/json; charset=utf-8',
         timeout: 10000,
         success: function(data) {
+            console.log(data);
             target.empty();
             printSections(target, data.result);
 
+            $.each(Object.keys(filterOption), function(index, key) {
+                $.each(filterOption[key], function(index, value) {
+                    $('input[name="agg_'+ key +'_'+ value +'"]').prop('checked', true);
+                })
+            });
         },
         error: function (data, xhr, responseText) {
             if(data.responseText.status == 1) {
-
+                // TODO - error page
+                /*$('html').load('error/4xx');*/
             }
         }
     })
@@ -199,45 +199,6 @@ function reqSearch(e) {
 function reqAutoComplete() {
     let keyword = $('.search-input').val();
 }
-
-function printSections(target, data) {
-    // Aggregation 초기화
-    let aggTarget = $('div#aggregation');
-    aggTarget.empty();
-
-    if(data.result.totalCnt > 0) {
-
-        printSearchInfo(target, data.result);
-
-        $.each(data.result.sectionList, function(index, data) {
-            if(data.sectionCnt > 0) {
-                if(data.sectionCode == 10000 && data.indexName == "idx_01_edms") {
-                    printEapproval(target, data);
-                } else if(data.sectionCode == 20000 && data.indexName == "idx_02_eapproval") {
-                    printEapproval(target, data);
-                } else if(data.sectionCode == 40000 && data.indexName == "idx_02_regulation") {
-                    printEapproval(target, data);
-                } else if(data.sectionCode == 50000 && data.indexName == "idx_03_people") {
-                    printPeople(target, data);
-                }
-            }
-        })
-
-        let currentTabCd = $('.total-menu ul li.on').data('searchCollapseCd');
-        if(currentTabCd != 99999) {
-            printAggregation(aggTarget, data.result);
-            printPagination(data.result.sectionList);
-        }
-
-
-
-    } else {
-        printNoResult(target, data.result);
-    }
-
-
-}
-
 
 </script>
 <body>
@@ -251,14 +212,14 @@ function printSections(target, data) {
             <div class="head-search">
                 <div class="search-form">
                     <div class="input-control">
-                        <input class="search-input" type="text" value=""/>
+                        <input class="search-input" type="text" value="<c:out value="${q}" />"/>
                         <input type="hidden" name="kwd" />
                         <input type="hidden" name="prevKwd" />
                         <input type="hidden" name="selectedPage" />
-                        <button type="button" class="btn-setting">검색 세팅</button>
+                        <button type="button" class="btn-setting" style="display: none;">검색 세팅</button>
 
                     <!-- 자동완성 -->
-                    <div class="box-setting">
+                    <div class="box-setting" style="display: none;">
                         <ul>
                             <li>
                                 <button type="button"><b>검색</b> 설정</button>
@@ -318,20 +279,20 @@ function printSections(target, data) {
                         <dt>영역</dt>
                         <dd>
                             <div class="from-radio-group">
-                                <div class="radio">
-                                    <input id="detail_area-all" type="radio" name="detail_area" value="AREA01" checked />
+                                <div class="checkbox">
+                                    <input id="detail_area-all" type="checkbox" name="detail_area" value="AREA01" checked />
                                     <label for="detail_area-all">전체</label>
                                 </div>
-                                <div class="radio">
-                                    <input id="detail_area-title" type="radio" name="detail_area" value="AREA02"/>
+                                <div class="checkbox">
+                                    <input id="detail_area-title" type="checkbox" name="detail_area" value="AREA02" />
                                     <label for="detail_area-title">제목</label>
                                 </div>
-                                <div class="radio">
-                                    <input id="detail_area-title-content" type="radio" name="detail_area" value="AREA03"/>
-                                    <label for="detail_area-title-content">제목+본문</label>
+                                <div class="checkbox">
+                                    <input id="detail_area-title-content" type="checkbox" name="detail_area" value="AREA03" />
+                                    <label for="detail_area-title-content">본문</label>
                                 </div>
-                                <div class="radio">
-                                    <input id="detail_area-attach" type="radio" name="detail_area" value="AREA04"/>
+                                <div class="checkbox">
+                                    <input id="detail_area-attach" type="checkbox" name="detail_area" value="AREA04" />
                                     <label for="detail_area-attach">첨부</label>
                                 </div>
                             </div>
@@ -364,7 +325,7 @@ function printSections(target, data) {
                             </div>
                             <div class="dir-date-input">
                                 <div class="radio">
-                                    <input id="detail_date-self" type="radio" name="detail_date"/>
+                                    <input id="detail_date-self" type="radio" name="detail_date" value="self"/>
                                     <label for="detail_date-self">기간 입력</label>
                                 </div>
                                 <div class="date-picker__period">
@@ -395,36 +356,36 @@ function printSections(target, data) {
                         <dd>
                             <div class="from-checkbox-group">
                                 <div class="checkbox">
-                                    <input id="file-all" type="checkbox" name="detail_file" value="ATTACHED00" checked />
-                                    <label for="file-all">전체</label>
+                                    <input id="detail_file-all" type="checkbox" name="detail_file" value="ATTACHED00" checked />
+                                    <label for="detail_file-all">전체</label>
                                 </div>
                                 <div class="checkbox">
-                                    <input id="file-hwp" type="checkbox" name="detail_file" value="ATTACHED01" checked />
-                                    <label for="file-hwp">아래한글</label>
+                                    <input id="detail_file-hwp" type="checkbox" name="detail_file" value="ATTACHED01" />
+                                    <label for="detail_file-hwp">아래한글</label>
                                 </div>
                                 <div class="checkbox">
-                                    <input id="file-doc" type="checkbox" name="detail_file" value="ATTACHED02" checked />
-                                    <label for="file-doc">워드</label>
+                                    <input id="detail_file-doc" type="checkbox" name="detail_file" value="ATTACHED02" />
+                                    <label for="detail_file-doc">워드</label>
                                 </div>
                                 <div class="checkbox">
-                                    <input id="file-ppt" type="checkbox" name="detail_file" value="ATTACHED03" checked />
-                                    <label for="file-ppt">파워포인트</label>
+                                    <input id="detail_file-ppt" type="checkbox" name="detail_file" value="ATTACHED03" />
+                                    <label for="detail_file-ppt">파워포인트</label>
                                 </div>
                                 <div class="checkbox">
-                                    <input id="file-xls" type="checkbox" name="detail_file" value="ATTACHED04" checked />
-                                    <label for="file-xls">엑셀</label>
+                                    <input id="detail_file-xls" type="checkbox" name="detail_file" value="ATTACHED04" />
+                                    <label for="detail_file-xls">엑셀</label>
                                 </div>
                                 <div class="checkbox">
-                                    <input id="file-pdf" type="checkbox" name="detail_file" value="ATTACHED05" checked />
-                                    <label for="file-pdf">pdf</label>
+                                    <input id="detail_file-pdf" type="checkbox" name="detail_file" value="ATTACHED05" />
+                                    <label for="detail_file-pdf">pdf</label>
                                 </div>
                                 <div class="checkbox">
-                                    <input id="file-txt" type="checkbox" name="detail_file" value="ATTACHED06" checked />
-                                    <label for="file-txt">텍스트</label>
+                                    <input id="detail_file-txt" type="checkbox" name="detail_file" value="ATTACHED06" />
+                                    <label for="detail_file-txt">텍스트</label>
                                 </div>
                                 <div class="checkbox">
-                                    <input id="file-besides" type="checkbox" name="detail_file" value="ATTACHED99" checked />
-                                    <label for="file-besides">기타</label>
+                                    <input id="detail_file-besides" type="checkbox" name="detail_file" value="ATTACHED99" />
+                                    <label for="detail_file-besides">기타</label>
                                 </div>
                             </div>
                         </dd>
@@ -529,7 +490,7 @@ function printSections(target, data) {
                             </li>
                             <li data-search-collapse-cd="50000">
                                 <button type="button" class="icon04">
-                                    <span>조직</span>
+                                    <span>임직원</span>
                                 </button>
                             </li>
                             <%--
@@ -577,11 +538,43 @@ function printSections(target, data) {
                                 <dl>
                                     <dt>영역</dt>
                                     <dd>
-                                        <div class="radio-group">
+                                        <%--<div class="radio-group">
                                             <input id="filter_area-all" type="radio" name="filter_area" value="AREA01" checked/>
                                             <label for="filter_area-all">전체</label>
                                             <input id="filter_area-title" type="radio" name="filter_area" value="AREA02"/>
                                             <label for="filter_area-title">제목</label>
+                                        </div>--%>
+
+                                        <div class="select-box-area">
+                                            <button type="button" class="select-box-area__btn off">전체</button>
+                                            <div class="select-box-area__content">
+                                                <ul>
+                                                    <li>
+                                                        <div class="checkbox">
+                                                            <input id="filter_area-all" type="checkbox" name="filter_area" value="AREA01" checked>
+                                                            <label for="filter_area-all">전체</label>
+                                                        </div>
+                                                    </li>
+                                                    <li>
+                                                        <div class="checkbox">
+                                                            <input id="filter_area-title" type="checkbox" name="filter_area" value="AREA02">
+                                                            <label for="filter_area-title">제목</label>
+                                                        </div>
+                                                    </li>
+                                                    <li>
+                                                        <div class="checkbox">
+                                                            <input id="filter_area-content" type="checkbox" name="filter_area" value="AREA03">
+                                                            <label for="filter_area-content">본문</label>
+                                                        </div>
+                                                    </li>
+                                                    <li>
+                                                        <div class="checkbox">
+                                                            <input id="filter_area-attach" type="checkbox" name="filter_area" value="AREA04">
+                                                            <label for="filter_area-attach">첨부</label>
+                                                        </div>
+                                                    </li>
+                                                </ul>
+                                            </div>
                                         </div>
                                     </dd>
                                 </dl>
@@ -736,10 +729,10 @@ function printSections(target, data) {
                             <dt>정렬</dt>
                             <dd>
                                 <div class="radio-group">
-                                    <input id="mobile_relevant_mobile" type="radio" checked name="mobile_sort-group"/>
-                                    <label for="mobile_relevant_mobile">정확도</label>
-                                    <input id="mobile_latest_mobile" type="radio" name="mobile_sort-group"/>
-                                    <label for="mobile_latest_mobile">최신순</label>
+                                    <input id="mobile_sort_relevant" type="radio" name="mobile_sort" value="10" checked/>
+                                    <label for="mobile_sort_relevant">정확도</label>
+                                    <input id="mobile_sort-latest" type="radio" name="mobile_sort" value="20"/>
+                                    <label for="mobile_sort-latest">최신순</label>
                                 </div>
                             </dd>
                         </dl>
@@ -747,9 +740,9 @@ function printSections(target, data) {
                             <dt>영역</dt>
                             <dd>
                                 <div class="radio-group">
-                                    <input id="mobile_area-all" type="radio" checked name="mobile_area-group"/>
+                                    <input id="mobile_area-all" type="radio" name="mobile_area" value="AREA01" checked/>
                                     <label for="mobile_area-all">전체</label>
-                                    <input id="mobile_area-title" type="radio" name="mobile_area-group"/>
+                                    <input id="mobile_area-title" type="radio" name="mobile_area" value="AREA02"/>
                                     <label for="mobile_area-title">제목</label>
                                 </div>
                             </dd>
@@ -766,13 +759,13 @@ function printSections(target, data) {
                                         <li>전체</li>
                                     </ul>
                                     <div class="date-range">
-                                        <input type="range" class="rangeInput" value="0" id="mobile_date-range" min="0" max="4" />
+                                        <input type="range" class="rangeInput" value="0" name="mobile_date" min="0" max="4" />
                                     </div>
                                 </div>
                                 <div class="total-search-detail__btn">
-                                    <button class="btn">직접입력</button>
-                                    <div class="popup-wrap">
-                                        <button type="button" class="btn-icon__close2 mobile_period-close-btn">닫기</button>
+                                    <button class="btn enterdirectly-btn__pc">직접입력</button>
+                                    <div class="popup-wrap popup-wrap__mobile popup-wrap">
+                                        <button type="button" class="btn-icon__close2 btn-close mobile_period-close-btn">닫기</button>
                                         <div class="header">
                                             <h2>기간</h2>
                                         </div>
@@ -785,7 +778,7 @@ function printSections(target, data) {
                                         </section>
                                         <div class="btn-area">
                                             <button class="btn__blue--search">검색</button>
-                                            <button class="btn__darkgray--close mobile_period-close-btn">닫기</button>
+                                            <button class="btn__darkgray--close btn-close mobile_period-close-btn">닫기</button>
                                         </div>
                                     </div>
                                 </div>
@@ -864,12 +857,11 @@ function printSections(target, data) {
                         <button type="button" class="btn-icon__search search-btn">검색</button>
                     </div>
                 </div>
-                <p class="copy">© Rayful System 2024. All rights reserved.</p>
             </div>
         </footer>
 
         <!-- 2024-07-21 수정-->
-        <div class="popup-wrap popup-wrap__pc">
+        <div class="popup-wrap popup-wrap__pc date_popup ">
             <button type="button" class="btn-icon__close2 btn-close filter_period-close-btn">닫기</button>
             <div class="header">
                 <h2>기간</h2>
@@ -883,7 +875,7 @@ function printSections(target, data) {
             </section>
             <div class="btn-area">
                 <button class="btn__blue--search filter_period-search-btn">검색</button>
-                <button class="btn__darkgray--close btn-close">닫기</button>
+                <button class="btn__darkgray--close btn-close filter_period-close-btn">닫기</button>
             </div>
         </div>
         <!-- // 2024-07-21 수정-->

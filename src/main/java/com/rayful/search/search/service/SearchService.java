@@ -18,6 +18,7 @@ import java.net.URI;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAmount;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -29,8 +30,6 @@ public class SearchService {
     private WebClient webClient;
 
     public Map<String, Object> getSearch(SearchVO searchVO) throws ConnectException {
-        searchVO.setUserId("ssh6019");
-
         HttpHeaders reqHeaders = HttpUtils.getHeaders(searchVO.getUserId());
 
         if("N".equals(searchVO.getRegDtmYn())) {
@@ -39,7 +38,7 @@ public class SearchService {
 
         System.out.println("searchVO = " + searchVO);
 
-        Map<String, Object> apiResultMap = this.webClient.post()
+        LinkedHashMap<String, Object> apiResultMap = (LinkedHashMap<String, Object>) this.webClient.post()
                 .headers(headers -> headers.addAll(reqHeaders))
                 .bodyValue(searchVO)
                 .retrieve()
@@ -50,7 +49,9 @@ public class SearchService {
                 })
                 .block();
 
-            ConvertUtils.convertResultMap(apiResultMap);
+//        log.debug("before convert resultMap : {}", apiResultMap);
+        ConvertUtils.convertResultMap(apiResultMap);
+        log.debug("after convert resultMap : {}", apiResultMap);
 
         return apiResultMap;
     }

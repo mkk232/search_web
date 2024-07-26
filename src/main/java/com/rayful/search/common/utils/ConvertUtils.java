@@ -15,19 +15,22 @@ public class ConvertUtils {
     @SuppressWarnings("unchecked")
     public static Map<String, Object> convertResultMap(Map<String, Object> apiResultMap) throws ConnectException {
         Map<String, Object> resultMap = (Map<String, Object>) apiResultMap.get("result");
-        Map<String, List<Object>> newAggregation = null;
-        List<Map<String, List<Object>>> newAggregationList = new ArrayList<>();
         if(resultMap != null) {
             if (Integer.parseInt(String.valueOf(resultMap.get("totalCnt"))) > 0) {
                 for (Map<String, Object> sectionMap : (List<Map<String, Object>>) resultMap.get("sectionList")) {
                     if (Integer.parseInt(String.valueOf(sectionMap.get("sectionCnt"))) > 0
                             && (((String) sectionMap.get("indexName")).startsWith("idx_01_"))
                                 || ((String) sectionMap.get("indexName")).startsWith("idx_02_")) {
+
+                        String sectionCode = (String) sectionMap.get("sectionCode");
                         for (Map<String, Object> docMap : (List<Map<String, Object>>) sectionMap.get("docList")) {
 
                             addViewDate(docMap);
 
                             addViewContent(docMap);
+
+                            addViewDocLink(docMap, sectionCode);
+
                         }
                     }
                 }
@@ -36,8 +39,6 @@ public class ConvertUtils {
             log.error("Search API connection error");
             throw new ConnectException("Search API connection error");
         }
-
-        System.out.println("apiResultMap = " + apiResultMap);
 
         return apiResultMap;
     }
@@ -53,7 +54,7 @@ public class ConvertUtils {
                 Date viewDate = simpleDateFormat.parse(regDtm);
                 String viewWriterNm = (String) docMap.get("writer_nm");
 
-                if (updDtm != null || docMap.get("updator_nm") != null) {
+                if (updDtm != null && docMap.get("updator_nm") != null) {
                     Date updDate = simpleDateFormat.parse(updDtm);
                     if (updDate.compareTo(viewDate) > 0) {
                         viewDate = updDate;
@@ -91,7 +92,29 @@ public class ConvertUtils {
         }
 
         docMap.put("view_content", viewContent);
+    }
 
+    private static void addViewDocLink(Map<String, Object> docMap, String sectionCode) {
+        String fullPath = "";
+        String frontPath = "";
+        String backPath = "";
+        String dbPath = (String) docMap.get("nsf_name");
+        String docId = (String) docMap.get("docid");
+        String viewCode = "0";
+
+        if(dbPath != null) {
+            frontPath = "https://pt.phakr.com/egate/global/eip/home/home.nsf/openpage?readform&url=/";
+
+            if("20000".equals(sectionCode) || "40000".equals(sectionCode)) {
+                backPath = "?opendocument&isundock=1";
+            }
+
+            fullPath = frontPath + dbPath + "/" + viewCode + "/" + docId + backPath;
+
+            docMap.put("view_docLink", fullPath);
+        } else {
+            docMap.put("view_docLink", "#");
+        }
     }
 
     @SuppressWarnings("unchecked")

@@ -1,5 +1,41 @@
+/*
+ * 표준 UI 검색 결과를 출력해주는 함수들을 정의한 파일
+ *
+ */
+
+function printSections(target, data) {
+    // Aggregation 초기화
+    let aggTarget = $('div#aggregation');
+    aggTarget.empty();
+
+    if(data.result.totalCnt > 0) {
+        printSearchInfo(target, data.result);
+
+        $.each(data.result.sectionList, function(index, data) {
+            if(data.sectionCnt > 0) {
+                if(data.sectionCode == 10000 && data.indexName == "idx_01_edms") {
+                    printEapproval(target, data);
+                } else if(data.sectionCode == 20000 && data.indexName == "idx_02_eapproval") {
+                    printEapproval(target, data);
+                } else if(data.sectionCode == 40000 && data.indexName == "idx_02_regulation") {
+                    printEapproval(target, data);
+                } else if(data.sectionCode == 50000 && data.indexName == "idx_03_people") {
+                    printPeople(target, data);
+                }
+            }
+        })
+
+        let currentTabCd = $('.total-menu ul li.on').data('searchCollapseCd');
+        if(currentTabCd != 99999) {
+            printAggregation(aggTarget, data.result);
+            printPagination(data.result.sectionList);
+        }
+    } else {
+        printNoResult(target, data.result);
+    }
+}
+
 function printEapproval(target, data) {
-    console.log(data);
     let sectionName = data.sectionName;
     let sectionCode = data.sectionCode;
     let docList = '';
@@ -15,11 +51,6 @@ function printEapproval(target, data) {
                     $('<a href="#" />')
                         .addClass(attach.attach_ext)
                         .html(attach.attach_nm)
-                )
-                .append(
-                    $('<button type="button" />')
-                        .addClass('btn-icon__preview')
-                        .text('파일 찾기')
                 )[0].outerHTML;
         })
 
@@ -30,9 +61,11 @@ function printEapproval(target, data) {
                     .append(
                         $('<strong />')
                             .append(
-                                $('<a href="#" />')
-                                    .addClass('color-third')
-                                    .html(doc.title)
+                                    $('<a />')
+                                        .attr('href', doc.view_docLink)
+                                        .attr('target', '_blank')
+                                        .addClass('color-third')
+                                        .html(doc.title)
                             )
                     )
                     .append(
@@ -75,7 +108,7 @@ function printEapproval(target, data) {
             .append(
                 $('<p />')
                     .addClass('text-date')
-                    .html(doc.view_writer_nm + '<b>|</b>' + doc.view_dtm)
+                    .html(isNull(doc.view_writer_nm) + '<b>|</b>' + doc.view_dtm)
             )[0].outerHTML;
     })
 
@@ -96,7 +129,7 @@ function printEapproval(target, data) {
                 )
                 .append(
                     collapseCd == '99999' ?
-                        data.sectionCnt > 5 ? printMoreButton(sectionName, sectionCode) : ''
+                        data.sectionCnt > 10 ? printMoreButton(sectionName, sectionCode) : ''
                         : ''
                 )
         )
@@ -105,6 +138,8 @@ function printEapproval(target, data) {
 // 임직원 검색
 function printPeople(target, data) {
     let sectionName = data.sectionName;
+    let sectionCode = data.sectionCode;
+    let collapseCd = $('div.total-menu li.on').data('searchCollapseCd');
 
     let peopleList = '';
     $.each(data.docList, function(index, doc) {
@@ -175,6 +210,11 @@ function printPeople(target, data) {
                             peopleList
                         )
                 )
+                .append(
+                    collapseCd == '99999' ?
+                        data.sectionCnt > 5 ? printMoreButton(sectionName, sectionCode) : ''
+                        : ''
+                )
     )
 
 }
@@ -191,13 +231,13 @@ function printAggregation(target, data) {
                     li += $('<li />')
                         .append(
                             $('<input type="checkbox" />')
-                                .attr('id', 'agg_' + index + '_' + itemIndex)
-                                .attr('name', 'agg_' + index)
+                                .attr('id', 'agg_' + field + '_' + item.key)
+                                .attr('name', 'agg_' + field + '_' + item.key)
                                 .val(item.key)
                         )
                         .append(
                             $('<label />')
-                                .attr('for', 'agg_' + index + '_' + itemIndex)
+                                .attr('for', 'agg_' +  field + '_' + item.key)
                                 .text(item.key + ' (' + item.doc_count +')')
                         )[0].outerHTML;
                 })
@@ -221,7 +261,7 @@ function printAggregation(target, data) {
                                         )
                                 )
                         )
-                        .append(
+                        /*.append(
                             $('<div />')
                                 .addClass('total-search-detail__btn')
                                 .append(
@@ -229,7 +269,7 @@ function printAggregation(target, data) {
                                         .addClass('btn search-btn')
                                         .text('적용')
                                 )
-                        )
+                        )*/
                 )
             }
         }
@@ -255,7 +295,6 @@ function printPagination(data) {
 
     let buttons = '';
     for(let index = start; index <= end; index++) {
-        console.log(index);
         buttons += $('<button type="button" />')
             .addClass('btn-num')
             .addClass(selectedPage == index ? 'on' : '')
@@ -364,11 +403,11 @@ function printSectionHeader(target, sectionName) {
                         $('<h2 />')
                             .addClass('box-tit')
                             .text(sectionName)
-                            .append(
+                            /*.append(
                                 $('<button type="button" />')
                                     .addClass('btn-info')
                                     .text('정보')
-                            )
+                            )*/
                             .append(
                                 $('<div />')
                                     .addClass('popup-wrap')
@@ -398,7 +437,27 @@ function printSectionHeader(target, sectionName) {
 }
 
 function printNoResult(target, data) {
-    console.log(data);
+    let viewText = '';
+    let prevKwd = data.prevKwd;
+    if(prevKwd.length >= 1) {
+        $.each(prevKwd, function(index, item) {
+            if(item != '') {
+                viewText += item;
+                if(index != prevKwd.length - 1) {
+                    viewText += ', ';
+                }
+            }
+        })
+    }
+
+    if(viewText != '') {
+        viewText += ', ';
+    }
+
+    viewText += data.kwd;
+
+    let searchInfo = '<b>' + viewText +'</b> 에 대한 검색 결과가 없습니다.';
+
     target.append(
         $('<div />')
             .addClass('box-nodata')
@@ -408,7 +467,7 @@ function printNoResult(target, data) {
                     .append(
                         $('<p />')
                             .addClass('tit')
-                            .html('<b>'+ data.kwd +'</b>' + ' 에 대한 검색 결과가 없습니다.')
+                            .html(searchInfo)
                     )
             )
             .append(
