@@ -9,18 +9,28 @@ function effectRange(target) {
 
 }
 
-/* 2024-07-22 상세검색 초기화 */
+/* 상세검색 초기화 */
 function setInitDetail() {
+    let checkedFilterSort = $('input[name=filter_sort]:checked').val();
+    let checkedFilterArea = $('input[name=filter_area]:checked');
+    let checkedFilterDate = $('input[name=filter_date]').val();
+
+    $('input[name=detail_sort]').prop('checked', false);
+    $('input[name=detail_sort][value='+ checkedFilterSort +']').prop('checked', true);
+
     $('input[name=detail_area]').prop('checked', false);
-    $('input[id=detail_area-all]').prop('checked', true);
+    $.each(checkedFilterArea, function(index, item) {
+        $('input[name=detail_area][value='+ $(item).val() +']').prop('checked', true);
+    })
+
+    $('input[name=detail_date][value='+ checkedFilterDate +']').prop('checked', true);
+
     $('input[name=detail_file]').prop('checked', false);
     $('input[id=detail_file-all]').prop('checked', true);
 
-    $('input#detail_date-all').prop('checked', true);
-    $('input[name=detail_sort][value="10"]').prop('checked', true);
 }
 
-/* 2024-07-22 상세조건 검색 버튼 클릭 시 상세조건과 필터 조건 동기화 */
+/* 상세조건 검색 버튼 클릭 시 상세조건과 필터 조건 동기화 */
 function setFilterCondition() {
     // area
     if($('input[name=detail_area]:checked').length > 0) {
@@ -44,6 +54,7 @@ function setFilterCondition() {
     }
 }
 
+/* null 일 경우 빈 스트링을 반환한다. */
 function isNull(item) {
     if(!item) {
         return ''
@@ -52,14 +63,7 @@ function isNull(item) {
     }
 }
 
-function getEApprovalLink(dbPath, docId) {
-    let frontUrl = "https://pt.phakr.com/egate/global/eip/home/home.nsf/openpage?readform&url=/";
-    let viewCode = 0;
-    let backUrl = "?opendocument&isundock=1";
-
-    return frontUrl + dbPath + "/" + viewCode + "/" + docId + backUrl;
-}
-
+/* 필터 검색 영역의 텍스트를 추가한다. */
 function addFilterAreaText() {
     let checkBoxAllCnt = $('input[name=filter_area][id!=filter_area-all]').length;
     let checkedCnt = $('input[name=filter_area][id!=filter_area-all]:checked').length;
@@ -79,6 +83,15 @@ function addFilterAreaText() {
     $('div.select-box-area button.select-box-area__btn').text(areaText)
 }
 
+/* 탭이동시 페이지를 초기화한다. */
 function initPagination() {
     $('input[name=selectedPage]').val(1);
+}
+
+function isEtcIcon(attachExt) {
+    let iconList = ['doc', 'docx', 'pptx', 'xls', 'xlsx', 'pdf', 'txt', 'psd'];
+    if(!iconList.includes(attachExt)) {
+        attachExt = 'etc';
+    }
+    return attachExt;
 }

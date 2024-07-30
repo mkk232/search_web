@@ -13,11 +13,15 @@ function printSections(target, data) {
 
         $.each(data.result.sectionList, function(index, data) {
             if(data.sectionCnt > 0) {
+                printSectionHeader(target, data.sectionName);
+
                 if(data.sectionCode == 10000 && data.indexName == "idx_01_edms") {
                     printEapproval(target, data);
                 } else if(data.sectionCode == 20000 && data.indexName == "idx_02_eapproval") {
                     printEapproval(target, data);
                 } else if(data.sectionCode == 40000 && data.indexName == "idx_02_regulation") {
+                    console.log("regulation")
+                    console.log(data);
                     printEapproval(target, data);
                 } else if(data.sectionCode == 50000 && data.indexName == "idx_03_people") {
                     printPeople(target, data);
@@ -48,8 +52,8 @@ function printEapproval(target, data) {
                 .attr('data-attach-id', attach.attach_id)
                 .addClass('file-download')
                 .append(
-                    $('<a href="#" />')
-                        .addClass(attach.attach_ext)
+                    $('<a />')
+                        .addClass(isEtcIcon(attach.attach_ext))
                         .html(attach.attach_nm)
                 )[0].outerHTML;
         })
@@ -113,7 +117,17 @@ function printEapproval(target, data) {
     })
 
     // header
-    printSectionHeader(target, sectionName);
+    /*printSectionHeader(target, sectionName);*/
+
+    if(collapseCd !== 99999) {
+        if(target.find('div.box-area__content').length > 0) {
+            console.log("########")
+            target.find('div.doc-result-box').append(
+                docList
+            )
+            return;
+        }
+    }
 
     // body
     target.find('div.box-area[data-section-name='+sectionName+']')
@@ -137,6 +151,7 @@ function printEapproval(target, data) {
 
 // 임직원 검색
 function printPeople(target, data) {
+    let resize = $('input[name=resize]').val()
     let sectionName = data.sectionName;
     let sectionCode = data.sectionCode;
     let collapseCd = $('div.total-menu li.on').data('searchCollapseCd');
@@ -149,7 +164,14 @@ function printPeople(target, data) {
                 $('<div />')
                     .addClass('thumnail')
                     .append(
-                        $('<div />').addClass('thumnail__img')
+                        $('<div />')
+                            /*.append(
+                                $('<img />')
+                                    .attr('src', 'http://pt.phakr.com/egate/global/eip/home/pref.nsf/photo_by_empno/cordial1/$file/cordial1.jpg?open&date=2024-07-29')
+                                    .attr('width', '100px')
+                                    .attr('height', '128px')
+                            )*/
+                            .addClass('thumnail__img')
                     )
                     .append(
                         $('<p />')
@@ -195,8 +217,31 @@ function printPeople(target, data) {
             )[0].outerHTML;
     })
 
+
+/*    console.log(resize == 'mobile' && target.children('div.box-area').length > 0);
+    console.log(target.find('.box-area'))
+    if(resize == 'mobile' && target.children('div.box-area').length > 0) {
+        console.log(peopleList);
+        console.log(target.find('ul.staff-content'));
+        target.find('ul.staff-content').append(peopleList);
+        return;
+    }*/
+
     // header
-    printSectionHeader(target, sectionName);
+    /*printSectionHeader(target, sectionName);*/
+
+    if(collapseCd !== '99999') {
+        if (target.find('div.staff-area').length > 0) {
+            console.log("#####");
+            target.find('ul.staff-content').append(
+                peopleList
+            )
+            return;
+        }
+    }
+
+
+
 
     // body
     target.find('div.box-area[data-section-name='+sectionName+']')
@@ -278,6 +323,7 @@ function printAggregation(target, data) {
 
 
 function printPagination(data) {
+    let resize = $('input[name=resize]').val();
     let defaultPageSize = 10;
     let selectedPage = $('input[name=selectedPage]').val();
     if(selectedPage === undefined || selectedPage < 1) {
@@ -294,46 +340,68 @@ function printPagination(data) {
     let end = Math.min((start + pageBlockSize - 1), maxPageCnt);
 
     let buttons = '';
-    for(let index = start; index <= end; index++) {
-        buttons += $('<button type="button" />')
-            .addClass('btn-num')
-            .addClass(selectedPage == index ? 'on' : '')
-            .attr('data-page-no', index)
-            .text(index)[0].outerHTML;
-    }
 
     let baseTarget = $('section.content article');
-    baseTarget.append(
-        $('<div />')
-            .addClass('paging-wrap')
+    if(resize == 'pc' || resize == 'tablet') {
+        for (let index = start; index <= end; index++) {
+            buttons += $('<button type="button" />')
+                .addClass('btn-num')
+                .addClass(selectedPage == index ? 'on' : '')
+                .attr('data-page-no', index)
+                .text(index)[0].outerHTML;
+        }
+
+
+        baseTarget.append(
+            $('<div />')
+                .addClass('paging-wrap')
+                .append(
+                    $('<div />')
+                        .addClass('numbers')
+                        .append(
+                            buttons
+                        )
+                )
+        )
+
+        // prev
+        if (pageBlockNo > 0) {
+            baseTarget.find('div.paging-wrap')
+                .prepend(
+                    $('<button class="btn-prev"/>')
+                        .attr('data-page-no', (pageBlockNo - 1) * pageBlockSize + 1)
+                        .html('&lt;')
+                )
+        }
+
+        // next
+        if (maxPageCnt >= (pageBlockNo + 1) * pageBlockSize + 1) {
+            baseTarget.find('div.paging-wrap')
+                .append(
+                    $('<button class="btn-next"/>')
+                        .attr('data-page-no', (pageBlockNo + 1) * pageBlockSize + 1)
+                        .html('&gt;')
+                )
+        }
+    }
+
+    let currentCnt = (pageBlockSize * selectedPage) >= totalCnt ? totalCnt : (pageBlockSize * selectedPage);
+    let moreCnt = (totalCnt - currentCnt) > 10 ? 10 : (totalCnt - currentCnt)
+    if(moreCnt > 0) {
+        baseTarget.find('div.box-area')
             .append(
-                $('<div />')
-                    .addClass('numbers')
+                $('<button />')
+                    .addClass('btn-more-list')
+                    .attr('data-page-no', parseInt(selectedPage) + 1)
                     .append(
-                        buttons
+                        $('<strong />').text(moreCnt + '건 더보기')
+                    )
+                    .append(
+                        $('<span />').text('(' + currentCnt + '/' + totalCnt + ')')
                     )
             )
-    )
-
-    // prev
-    if(pageBlockNo > 0) {
-        baseTarget.find('div.paging-wrap')
-            .prepend(
-                $('<button class="btn-prev"/>')
-                    .attr('data-page-no', (pageBlockNo - 1) * pageBlockSize + 1)
-                    .html('&lt;')
-            )
     }
 
-    // next
-    if(maxPageCnt >= (pageBlockNo + 1) * pageBlockSize + 1) {
-        baseTarget.find('div.paging-wrap')
-            .append(
-                $('<button class="btn-next"/>')
-                    .attr('data-page-no', (pageBlockNo + 1) * pageBlockSize + 1)
-                    .html('&gt;')
-            )
-    }
 }
 
 function printMoreButton(sectionName, sectionCode) {
@@ -392,6 +460,10 @@ function printSearchInfo(target, data) {
 }
 
 function printSectionHeader(target, sectionName) {
+    if(target.find('div.staff-area').length > 0) {
+        return;
+    }
+
     target.append(
         $('<div />')
             .addClass('box-area')

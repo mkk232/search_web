@@ -45,9 +45,13 @@ $('div.total-menu ul li').on('click', function() {
         $('div.total-menu ul li.on').removeClass('on');
         $(this).addClass('on');
 
+        // mobile / tablet
+        $('button.total-wrap__btn').text($(this).find('span').text())
+
         $($('div.input-control button.search-btn')[0]).trigger('click');
     }
 })
+
 
 // 키워드 입력 이벤트 ( 상세검색, 하단 검색 박스 동기화 )
 $('.search-input').on('keyup', function() {
@@ -74,6 +78,13 @@ $(document).on('click', 'div.paging-wrap button', function() {
 
     $('input[name=selectedPage]').val(selectedNo);
     reqSearch();
+})
+
+// 모바일 페이징 클릭 이벤트
+$(document).on('click', 'button.btn-more-list', function(e) {
+    let selectedNo = $(this).data('pageNo');
+    $('input[name=selectedPage]').val(selectedNo);
+    reqSearch(e);
 })
 
 /* Main 이벤트 */

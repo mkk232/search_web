@@ -12,6 +12,7 @@ import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
 import org.springframework.web.reactive.function.client.ExchangeStrategies;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import reactor.core.publisher.Mono;
@@ -29,6 +30,8 @@ public class WebConfig implements WebMvcConfigurer {
 //
 //    @Value("${webclient.connection-timeout}")
 //    private int timeout;
+
+
 
     @Bean
     public WebClient getWebClient(@Value("${searchapi.host}") String baseUrl) {
@@ -68,7 +71,18 @@ public class WebConfig implements WebMvcConfigurer {
         return client;
     }
 
-//    @Override
+  /*  @Override
+    public void addCorsMappings(CorsRegistry registry) {
+        registry.addMapping("/**")
+                .allowedOrigins("*")
+                .allowedMethods("GET", "POST", "PUT", "DELETE")
+                .allowedHeaders("Authorization", "Content-Type")
+                .exposedHeaders("Custom-Header")
+                .allowCredentials(true)
+                .maxAge(3600);
+    }
+*/
+    //    @Override
 //    public void addInterceptors(InterceptorRegistry registry) {
 //        registry.addInterceptor(new AuthInterceptor());
 //    }

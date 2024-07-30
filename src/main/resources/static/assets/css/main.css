@@ -915,7 +915,7 @@ footer .search-form .box-setting__buttom {
   justify-content: flex-start;
   align-items: center;
   /*gap: 0 5px; 2024-07-19 하이라이팅 처리로 인해 제거 */
-  text-decoration: underline;
+  /*text-decoration: underline; 2024-07-30 첨부파일명 밑줄 제거 */
   color: #333;
   font-size: 1.3rem;
 }
@@ -947,6 +947,11 @@ footer .search-form .box-setting__buttom {
 }
 .file-download a.psd::before {
   background: url("../images/icon/icon-psd.svg") no-repeat 0 0;
+  background-size: 18px;
+}
+
+.file-download a.etc::before {
+  background: url("../images/icon/icon-etc.svg") no-repeat 0 0;
   background-size: 18px;
 }
 
@@ -1923,9 +1928,9 @@ footer .search-form .box-setting__buttom {
 .search-terms .total-wrap .total-menu ul li:nth-child(odd) {
   border-right: 1px solid #ddd;
 }
-.search-terms .total-wrap .total-menu ul li:last-child {
+/*.search-terms .total-wrap .total-menu ul li:last-child {
   width: 100%;
-}
+}*/
 .search-terms .total-wrap .total-menu ul li.on button {
   color: #008CF1;
 }
@@ -3519,6 +3524,60 @@ footer .search-form .box-setting__buttom {
 @media only screen and (min-width: 1280px) {
   .doc-tree-wrap {
     display: block;
+  }
+}
+
+.error-page {
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  padding: 0 15px;
+}
+.error-page .img {
+  background: url("../images/common/error.svg") no-repeat 0px;
+  background-size: 0px;
+  margin: 0 auto;
+  width: 200px;
+  height: 130px;
+  background-size: 200px, 130px;
+}
+.error-page h1 {
+  margin-top: 1rem;
+  text-align: center;
+  font-size: 5rem;
+  font-weight: 700;
+}
+.error-page h2 {
+  margin-top: 1.5rem;
+  text-align: center;
+  font-size: 2rem;
+  font-weight: 700;
+}
+.error-page p {
+  text-align: center;
+  margin-top: 2rem;
+  font-size: 1.4rem;
+  line-height: 2.2rem;
+}
+.error-page .btn-area {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 5px;
+  width: 100%;
+  max-width: 450px;
+  margin-top: 40px;
+}
+.error-page .btn-area button {
+  width: 100%;
+  height: 40px;
+}
+@media only screen and (min-width: 768px) {
+  .error-page .btn-area {
+    max-width: 320px;
   }
 }
 

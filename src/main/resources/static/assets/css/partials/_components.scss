@@ -203,6 +203,11 @@
                 @include backgroundImage('../images/icon/icon-ex.svg', 0 0, 18px)
             }
         }
+        &.etc {
+            &::before {
+                @include backgroundImage('../images/icon/icon-etc.svg', 0 0, 18px)
+            }
+        }
     }
 }
 

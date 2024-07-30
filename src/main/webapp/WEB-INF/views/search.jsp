@@ -17,12 +17,10 @@
 <style>
     em {
         font-weight: bold;
-        /*margin-top: 7px;*/
         line-height: 2.0rem;
         font-size: 1.4rem;
         text-overflow: ellipsis;
         overflow: hidden;
-        /*display: -webkit-box;*/
         -webkit-box-orient: vertical;
         -webkit-line-clamp: 3;
     }
@@ -36,6 +34,7 @@
     <%--let query = '<c:out value="${q}" />';--%>
     $(document).ready(function() {
 
+
         // 페이지 로드 시 필터 기간 Range 영역 초기 세팅
         $('input[type=range].rangeInput').on('change', function(event) {
             $('input[type=range].rangeInput').val(event.target.value);
@@ -45,16 +44,7 @@
         $('input[type=range].rangeInput').val(4);
         effectRange($('input[type=range].rangeInput'));
 
-        // TODO - 배포 시 삭제
         reqSearch();
-
-
-        // TODO 삭제 여부 판단 필요
-        // $('input[name^=agg]').on('change', $('dl.files, dl.years'), function() {
-        //     console.log('click')
-        //     reqSearch();
-        // })
-
     })
 
 function reqSearch(e) {
@@ -86,11 +76,9 @@ function reqSearch(e) {
         sort: $('input[name=detail_sort]:checked').val(),
         reSrchYn: 'N',
         period : $('input[name=detail_date]:checked').val(),
-        // page: $('button.btn-num.on').data('pageNo') ?  $('button.btn-num.on').data('pageNo') : 1
         page: $('input[name=selectedPage]').val() ? $('input[name=selectedPage]').val() : 1
     }
 
-    // TODO - 디자인 작업 후 수정 필요
     // 검색 영역
     let searchAreaList = [];
     if(!$('input[id=filter_area-all]').prop('checked')) {
@@ -138,7 +126,8 @@ function reqSearch(e) {
 
     // 필터 기간 직접입력 검색
     if(e !== undefined ) {
-        if(e.target.className.includes('filter_period-search-btn')) {
+        if(e.target.className.includes('filter_period-search-btn')
+            || $('input[id=detail_date-self]').prop('checked')) {
             let endDtm = $('input[name=detail_date-self-end]').val();
             let startDtm = $('input[name=detail_date-self-start]').val();
             if (startDtm === '') {
@@ -177,7 +166,18 @@ function reqSearch(e) {
         timeout: 10000,
         success: function(data) {
             console.log(data);
-            target.empty();
+
+            if(e === undefined) {
+                // enter
+                target.empty();
+            } else {
+                if (!$(e.currentTarget).hasClass('btn-more-list')) {
+                    target.empty();
+                } else {
+                    $('section.content article div.box-area button.btn-more-list').remove();
+                }
+            }
+
             printSections(target, data.result);
 
             $.each(Object.keys(filterOption), function(index, key) {
@@ -206,7 +206,9 @@ function reqAutoComplete() {
         <!-- header -->
         <header>
             <div class="head-info">
-                <h1 class="logo">payful system</h1>
+                <a href="/">
+                    <h1 class="logo">payful system</h1>
+                </a>
                 <%--<button type="button" class="tip">도움말</button>--%>
             </div>
             <div class="head-search">
@@ -216,6 +218,7 @@ function reqAutoComplete() {
                         <input type="hidden" name="kwd" />
                         <input type="hidden" name="prevKwd" />
                         <input type="hidden" name="selectedPage" />
+                        <input type="hidden" name="resize" />
                         <button type="button" class="btn-setting" style="display: none;">검색 세팅</button>
 
                     <!-- 자동완성 -->
@@ -325,7 +328,7 @@ function reqAutoComplete() {
                             </div>
                             <div class="dir-date-input">
                                 <div class="radio">
-                                    <input id="detail_date-self" type="radio" name="detail_date" value="self"/>
+                                    <input id="detail_date-self" type="radio" name="detail_date" value="99"/>
                                     <label for="detail_date-self">기간 입력</label>
                                 </div>
                                 <div class="date-picker__period">
@@ -785,9 +788,9 @@ function reqAutoComplete() {
                             </dd>
                         </dl>
                     </div>
-                    <div class="bottom-reset">
+<%--                    <div class="bottom-reset">
                         <button type="button" class="btn-reset">전체 초기화</button>
-                    </div>
+                    </div>--%>
                 </div>
             </div>
             <!-- Mobile 상세검색 -->

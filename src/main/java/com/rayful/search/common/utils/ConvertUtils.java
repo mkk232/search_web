@@ -11,7 +11,6 @@ import java.util.*;
 public class ConvertUtils {
     private ConvertUtils() {}
 
-    // 첨부 하이라이트 -> 본문 하이라이트 -> 첨부 -> 본문
     @SuppressWarnings("unchecked")
     public static Map<String, Object> convertResultMap(Map<String, Object> apiResultMap) throws ConnectException {
         Map<String, Object> resultMap = (Map<String, Object>) apiResultMap.get("result");
@@ -71,6 +70,7 @@ public class ConvertUtils {
         }
     }
 
+    // 첨부 하이라이트 -> 본문 하이라이트 -> 첨부 -> 본문
     private static void addViewContent(Map<String, Object> docMap) {
         String viewContent = (String) docMap.get("content.highlight");
 

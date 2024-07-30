@@ -7,18 +7,28 @@ const resize = () => {
         const popularWrapBtn = document.querySelector('.popular-wrap__btn');
         const tsdMoreBtn = document.querySelector('.tsd-more-btn');
         const popularListContent = document.querySelector('.popular-list__content');
+        const resizeInput = $('input[name=resize]');
 
         if (width >= 1280) {
             totalWrapBtn.classList.add('on');
             popularWrapBtn.classList.add('on');
             tsdMoreBtn.classList.add('on');
             popularListContent.style.transform = `translateX(0px)`;
+            $('button.btn-more-list').hide();
+            $('div.paging-wrap').show();
+            resizeInput.val('pc');
         } else if (width >= 768) {
             totalWrapBtn.classList.remove('on')
             popularWrapBtn.classList.remove('on')
             tsdMoreBtn.classList.remove('on');
             popularListContent.style.transform = `translateX(0px)`;
+            $('button.btn-more-list').hide();
+            $('div.paging-wrap').show();
+            resizeInput.val('tablet');
         } else if (width >= 360) {
+            $('button.btn-more-list').show();
+            $('div.paging-wrap').hide();
+            resizeInput.val('mobile');
         } else {
         }
     }
