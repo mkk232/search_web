@@ -5,26 +5,24 @@
 
 function printSections(target, data) {
     // Aggregation 초기화
-    let aggTarget = $('div#aggregation');
+    let aggTarget = $('div.aggregation');
     aggTarget.empty();
 
     if(data.result.totalCnt > 0) {
         printSearchInfo(target, data.result);
 
-        $.each(data.result.sectionList, function(index, data) {
-            if(data.sectionCnt > 0) {
-                printSectionHeader(target, data.sectionName);
+        $.each(data.result.sectionList, function(index, section) {
+            if(section.sectionCnt > 0) {
+                printSectionHeader(target, section);
 
-                if(data.sectionCode == 10000 && data.indexName == "idx_01_edms") {
-                    printEapproval(target, data);
-                } else if(data.sectionCode == 20000 && data.indexName == "idx_02_eapproval") {
-                    printEapproval(target, data);
-                } else if(data.sectionCode == 40000 && data.indexName == "idx_02_regulation") {
-                    console.log("regulation")
-                    console.log(data);
-                    printEapproval(target, data);
-                } else if(data.sectionCode == 50000 && data.indexName == "idx_03_people") {
-                    printPeople(target, data);
+                if(section.sectionCode == 10000 && section.indexName == "idx_01_edms") {
+                    printDocument(target, section);
+                } else if(section.sectionCode == 20000 && section.indexName == "idx_02_eapproval") {
+                    printDocument(target, section);
+                } else if(section.sectionCode == 40000 && section.indexName == "idx_02_regulation") {
+                    printDocument(target, section);
+                } else if(section.sectionCode == 50000 && section.indexName == "idx_03_people") {
+                    printPeople(target, section);
                 }
             }
         })
@@ -39,20 +37,24 @@ function printSections(target, data) {
     }
 }
 
-function printEapproval(target, data) {
+function printDocument(target, data) {
     let sectionName = data.sectionName;
     let sectionCode = data.sectionCode;
     let docList = '';
     let collapseCd = $('div.total-menu li.on').data('searchCollapseCd');
 
+
     $.each(data.docList, function(index, doc) {
         let attachList = '';
+        /* 첨부파일 */
         $.each(doc.attach_info, function(index, attach) {
             attachList += $('<div />')
                 .attr('data-attach-id', attach.attach_id)
                 .addClass('file-download')
                 .append(
                     $('<a />')
+                        .attr('href', attach.view_downloadUrl)
+                        .attr('target', '_blank')
                         .addClass(isEtcIcon(attach.attach_ext))
                         .html(attach.attach_nm)
                 )[0].outerHTML;
@@ -66,8 +68,7 @@ function printEapproval(target, data) {
                         $('<strong />')
                             .append(
                                     $('<a />')
-                                        .attr('href', doc.view_docLink)
-                                        .attr('target', '_blank')
+                                        .attr('data-url', doc.view_docLink)
                                         .addClass('color-third')
                                         .html(doc.title)
                             )
@@ -121,7 +122,6 @@ function printEapproval(target, data) {
 
     if(collapseCd !== 99999) {
         if(target.find('div.box-area__content').length > 0) {
-            console.log("########")
             target.find('div.doc-result-box').append(
                 docList
             )
@@ -217,31 +217,17 @@ function printPeople(target, data) {
             )[0].outerHTML;
     })
 
-
-/*    console.log(resize == 'mobile' && target.children('div.box-area').length > 0);
-    console.log(target.find('.box-area'))
-    if(resize == 'mobile' && target.children('div.box-area').length > 0) {
-        console.log(peopleList);
-        console.log(target.find('ul.staff-content'));
-        target.find('ul.staff-content').append(peopleList);
-        return;
-    }*/
-
     // header
     /*printSectionHeader(target, sectionName);*/
 
     if(collapseCd !== '99999') {
         if (target.find('div.staff-area').length > 0) {
-            console.log("#####");
             target.find('ul.staff-content').append(
                 peopleList
             )
             return;
         }
     }
-
-
-
 
     // body
     target.find('div.box-area[data-section-name='+sectionName+']')
@@ -351,7 +337,6 @@ function printPagination(data) {
                 .text(index)[0].outerHTML;
         }
 
-
         baseTarget.append(
             $('<div />')
                 .addClass('paging-wrap')
@@ -386,7 +371,7 @@ function printPagination(data) {
     }
 
     let currentCnt = (pageBlockSize * selectedPage) >= totalCnt ? totalCnt : (pageBlockSize * selectedPage);
-    let moreCnt = (totalCnt - currentCnt) > 10 ? 10 : (totalCnt - currentCnt)
+    let moreCnt = (totalCnt - currentCnt) > defaultPageSize ? defaultPageSize : (totalCnt - currentCnt)
     if(moreCnt > 0) {
         baseTarget.find('div.box-area')
             .append(
@@ -401,7 +386,6 @@ function printPagination(data) {
                     )
             )
     }
-
 }
 
 function printMoreButton(sectionName, sectionCode) {
@@ -416,6 +400,9 @@ function printMoreButton(sectionName, sectionCode) {
 }
 
 function printSearchInfo(target, data) {
+    if($('input[name=resize]').val() != 'pc') {
+        return;
+    }
     let viewText = '';
     let prevKwd = data.prevKwd;
     if(prevKwd.length >= 1) {
@@ -459,10 +446,19 @@ function printSearchInfo(target, data) {
     )
 }
 
-function printSectionHeader(target, sectionName) {
-    if(target.find('div.staff-area').length > 0) {
+function printSectionHeader(target, data) {
+    let collapseCd = $('div.total-menu li.on').data('searchCollapseCd');
+
+    /* 모바일 더보기 클릭 시 헤더 출력 방지 */
+    if(collapseCd !== 99999 &&
+        (target.find('div.staff-area').length > 0
+        || target.find('div.box-area__content').length > 0)) {
         return;
+
     }
+    let sectionName = data.sectionName;
+    let sectionCode = data.sectionCode;
+    let sectionCnt = data.sectionCnt;
 
     target.append(
         $('<div />')
@@ -500,9 +496,14 @@ function printSectionHeader(target, sectionName) {
                             )
                     )
                     .append(
-                        $('<a href="#" />')
-                            .addClass('btn-icon-text__more')
-                            .text(sectionName + ' 더보기')
+                        collapseCd == '99999' ?
+                            sectionCnt > 10 ?
+                                $('<a href="#" />')
+                                    .addClass('btn-icon-text__more')
+                                    .attr('data-search-collapse-cd', sectionCode)
+                                    .text(sectionName + ' 더보기')
+                                : ''
+                            : ''
                     )
             )
     )

@@ -17,15 +17,6 @@ $('input[type=checkbox]').on('click', function() {
         }
         $(this).prop('checked', true);
 
-        /*let checkAll = $(this).prop('checked');
-        if(!checkAll) {
-            $('input[name='+ checkboxName +']').prop('checked', true);
-            return;
-        }
-
-        $.each($('input[name=' + checkboxName + ']'), function(index, item) {
-            $(item).prop('checked', checkAll);
-        })*/
     } else {
         if(checkBoxAllCnt == checkedCnt) {
             $('input[id='+ checkboxName +'-all]').prop('checked', true);
@@ -87,6 +78,25 @@ $(document).on('click', 'button.btn-more-list', function(e) {
     reqSearch(e);
 })
 
+$(document).on('click', 'div.doc-result-box h3 strong a', function() {
+    const popupWidth = 1200;
+    const popupHeight = 900;
+
+    // 현재 브라우저 창의 크기
+    let screenWidth = window.innerWidth;
+    let screenHeight = window.innerHeight;
+
+    // 팝업 창의 중앙 위치 계산
+    let left = (screenWidth / 2) - (popupWidth / 2);
+    let top = (screenHeight / 2) - (popupHeight / 2);
+
+    let url = $(this).data('url');
+    let option = `width=${popupWidth},height=${popupHeight},top=${top},left=${left}`;
+    let name = 'PHA'
+
+    window.open(url, name, option);
+})
+
 /* Main 이벤트 */
 
 
@@ -101,7 +111,8 @@ $('button[class$=search-btn]').on('click', function(e) {
         detailModal.removeClass('on');
         detailModal.addClass('off');
     }
-    // $('div.btn-area button.btn-detail-close').trigger('click');
+
+    $('button.filter_period-close-btn.btn__darkgray--close').trigger('click');
 })
 
 // 검색창 엔터 이벤트
@@ -133,13 +144,6 @@ $('.btn-autoComplete-close').on('click', function() {
 
 /* Filter 이벤트 */
 
-// Filter - 클릭 이벤트
-/*$('div.total-search-detail__content input[type=radio], div.total-search-detail__content input[type=range]')
-    .off().on('change', function() {
-        $('div.head-search div.input-control button.search-btn').trigger('click');
-    })*/
-
-
 // Filter - 기간 직접입력 Modal 열기/닫기 이벤트
 $('button[class$=_period-close-btn]').on('click', function() {
     let periodModalBtn = $('div.total-search-detail__btn button.btn');
@@ -148,18 +152,7 @@ $('button[class$=_period-close-btn]').on('click', function() {
         periodModal.hide();
         periodModalBtn.removeClass('on');
         periodModalBtn.addClass('off');
-    } else {
-        periodModal.show();
-        periodModalBtn.removeClass('off');
-        periodModalBtn.addClass('on');
     }
-})
-
-// Filter - 기간 직접입력 검색 이벤트
-$('button.filter_period-search-btn').on('click', function(e) {
-    initPagination();
-    $('button.filter_period-close-btn.btn__darkgray--close').trigger('click');
-    reqSearch(e);
 })
 
 // Filter - 정렬 클릭 이벤트 ( 동기화 )
@@ -168,22 +161,22 @@ $('input[name$=_sort][name!=detail_sort]').on('change', function(e) {
     let checkedSortValue;
     checkedSortValue = $(this).val();
     $('input[name$=_sort][value=' + checkedSortValue + ']').prop('checked', true);
-    // $('input[name=detail_sort-group][value=' + checkedSortValue + ']').prop('checked', true);
     reqSearch(e);
 })
 
 // Filter - 검색 영역 클릭 이벤트 ( 동기화 )
-$('input[name=filter_area]').on('change', function() {
+$('input[name$=_area][name!=detail_area]').on('change', function() {
+    let name = $(this).attr('name');
     initPagination();
-    addFilterAreaText();
 
     // 상세검색과 동기화
-    $.each($('input[name=filter_area]'), function(index, item) {
+    $.each($('input[name='+ name +']'), function(index, item) {
         let itemValue = $(item).val();
         let isChecked = $(item).prop('checked');
-        $('input[name=detail_area][value='+ itemValue +']').prop('checked', isChecked);
+        $('input[name$=_area][value='+ itemValue +']').prop('checked', isChecked);
     })
 
+    updateAreaText();
     reqSearch();
 })
 
@@ -192,33 +185,36 @@ $('input[name$=_date][name!=detail_date]').on('change', function(e) {
     initPagination();
     let checkedDateValue = $(this).val();
     $('input[name$=_date][value=' + checkedDateValue + ']').prop('checked', true);
+
     reqSearch(e);
 })
 
 // Filter - 기간 직접입력 이벤트 ( 동기화 )
 $('input[name$=_date-self-start], input[name$=_date-self-end]').on('change', function(e) {
     let selectedDate = $(this).val();
-    if(e.target.name.startsWith('detail_')) {
-        if(e.target.name.endsWith('start')) {
-            $('input[name=filter_date-self-start]').val(selectedDate);
-        } else {
-            $('input[name=filter_date-self-end]').val(selectedDate);
-        }
-    } else if(e.target.name.startsWith('filter_')) {
-        if(e.target.name.endsWith('start')) {
-            $('input[name=detail_date-self-start]').val(selectedDate);
-        } else {
-            $('input[name=detail_date-self-end]').val(selectedDate);
-        }
+    let suffix = e.target.name.endsWith('start') ? 'start' : 'end';
+
+    const updateInputs = (prefixes) => {
+        prefixes.forEach(prefix => {
+            $(`input[name=${prefix}_date-self-${suffix}]`).val(selectedDate);
+        });
+    };
+
+    if (e.target.name.startsWith('detail_')) {
+        updateInputs(['filter', 'mobile']);
+    } else if (e.target.name.startsWith('filter_')) {
+        updateInputs(['detail', 'mobile']);
+    } else if (e.target.name.startsWith('mobile_')) {
+        updateInputs(['filter', 'detail']);
     }
-})
+
+});
 
 // Aggregation 클릭 이벤트
 $(document).on('change', 'input[name^=agg_]', function() {
     initPagination();
     reqSearch();
 })
-
 
 /* Filter 이벤트 */
 
@@ -239,24 +235,11 @@ $('.btn-detail-close, .btn-detail-search').on('click', function() {
 
 })
 
-
-// 상세검색 초기화 버튼 클릭 이벤트
+// 상세검색 - 초기화 버튼 클릭 이벤트
 $('div.box-detail div.btn-area button.btn-detail-reset').on('click', function() {
     setInitDetail();
 })
 
-
-// 상세검색 검색 영역 클릭 이벤트
-$('input[name=detail_area]').on('change', function() {
-    initPagination();
-
-    if($(this).attr('id').endsWith('all')) {
-        if(!$(this).prop('checked')) {
-            $('input[name=detail_area]').prop('checked', true);
-            return;
-        }
-    }
-})
 
 /* 상세검색 이벤트 */
 

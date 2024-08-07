@@ -5,7 +5,11 @@ import org.jasypt.encryption.pbe.StandardPBEStringEncryptor;
 public class EncryptorTestClass {
 
     public static void main(String[] args) {
-        // 암호화에 사용할 마스터 비밀번호
+        String attachNm = "2024年<em>1</em>季度盘点报告.xls";
+        System.out.println("before attachNm = " + attachNm);
+        attachNm = attachNm.replace("<em>", "").replace("</em>", "");
+        System.out.println("after attachNm = " + attachNm);
+        /*// 암호화에 사용할 마스터 비밀번호
         String masterPassword = "@standardSecurityKey";
         String algorithm = "PBEWithMD5AndDES";
 
@@ -24,6 +28,6 @@ public class EncryptorTestClass {
         String decryptedUserId = encryptor.decrypt(encryptedUserId);
 
         System.out.println("암호화된 문자열: " + encryptedUserId);
-        System.out.println("복호화된 문자열: " + decryptedUserId);
+        System.out.println("복호화된 문자열: " + decryptedUserId);*/
     }
 }

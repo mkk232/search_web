@@ -36,7 +36,7 @@ public class SearchService {
             searchVO.setPeriod();
         }
 
-        System.out.println("searchVO = " + searchVO);
+        log.debug("searchVO = {}", searchVO);
 
         LinkedHashMap<String, Object> apiResultMap = (LinkedHashMap<String, Object>) this.webClient.post()
                 .headers(headers -> headers.addAll(reqHeaders))
@@ -49,7 +49,6 @@ public class SearchService {
                 })
                 .block();
 
-//        log.debug("before convert resultMap : {}", apiResultMap);
         ConvertUtils.convertResultMap(apiResultMap);
         log.debug("after convert resultMap : {}", apiResultMap);
 
@@ -69,10 +68,5 @@ public class SearchService {
 
         return null;
     }
-
-    private void setPeriod(SearchVO searchVO) {
-
-    }
-
 
 }

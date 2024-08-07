@@ -170,12 +170,6 @@
             }
         }
 
-        &.ppt {
-            &::before {
-                @include backgroundImage('../images/icon/icon-pdf.svg', 0 0, 18px)
-            }
-        }
-
         &.pptx {
             &::before {
                 @include backgroundImage('../images/icon/icon-pdf.svg', 0 0, 18px)
@@ -202,17 +196,6 @@
         &.psd {
             &::before {
                 @include backgroundImage('../images/icon/icon-psd.svg', 0 0, 18px)
-            }
-        }
-        &.docx {
-            &::before {
-                @include backgroundImage('../images/icon/icon-word.svg', 0 0, 18px)
-            }
-        }
-
-        &.xlsx {
-            &::before {
-                @include backgroundImage('../images/icon/icon-ex.svg', 0 0, 18px)
             }
         }
         &.etc {
@@ -414,16 +397,16 @@
             height: 30px;
             font-size: 1.3rem;
             outline: none;
-
+            
             &::-webkit-calendar-picker-indicator {
                 opacity: 0;
             }
-
+    
             &:disabled {
                 color: $color-gray;
                 background-color: $color-palegray;
             }
-
+    
             &:hover:not([disabled]),
             &:focus:not([disabled]) {
                 box-shadow: 4px 4px 4px rgba($color: #000000, $alpha: 0.1)
@@ -2758,7 +2741,7 @@
                 align-items: center;
                 gap: 0 5px;
                 margin-top: 10px;
-
+    
                 strong {
                     font-size: 1.3rem;
                     font-weight: $font-bold;
@@ -3122,7 +3105,7 @@
 
     .img {
         @include backgroundImage('../images/common/error.svg', 0px, 0px);
-
+        
         margin: 0 auto;
         width: 200px;
         height: 130px;
@@ -3137,7 +3120,7 @@
     }
 
     h2 {
-
+        
         margin-top: 1.5rem;
         text-align: center;
         font-size: 2rem;
@@ -3156,7 +3139,7 @@
         width: 100%;
         max-width: 450px;
         margin-top: 40px;
-
+        
         button {
             width: 100%;
             height: 40px;

@@ -34,7 +34,7 @@ public class WebConfig implements WebMvcConfigurer {
 
 
     @Bean
-    public WebClient getWebClient(@Value("${searchapi.host}") String baseUrl) {
+    public WebClient getWebClient(@Value("${searchApi.host}") String baseUrl) {
         HttpClient httpClient = HttpClient.create()
                 .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 5000)
                 .responseTimeout(Duration.ofMillis(5000))

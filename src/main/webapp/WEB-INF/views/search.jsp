@@ -1,11 +1,13 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="spring" uri="http://www.springframework.org/tags" %>
+<spring:eval expression="@environment.getProperty('javascript.menuId.sectionCode')" var="menuId"/>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rayful System</title>
+    <title>PHA</title>
     <link rel="stylesheet" href="../assets/css/main.css">
     <script src="/js/lib/jquery.min.3.7.1.js"></script>
     <script defer src="/js/jquery-rayful-common.js"></script>
@@ -15,190 +17,178 @@
 
 </head>
 <style>
-    em {
-        font-weight: bold;
-        line-height: 2.0rem;
-        font-size: 1.4rem;
-        text-overflow: ellipsis;
-        overflow: hidden;
-        -webkit-box-orient: vertical;
-        -webkit-line-clamp: 3;
-    }
-
     div.staff-area {
         padding: 20px;
     }
 </style>
-
 <script type="text/javascript">
-    <%--let query = '<c:out value="${q}" />';--%>
-    $(document).ready(function() {
-
-
+    $(document).ready(function () {
         // 페이지 로드 시 필터 기간 Range 영역 초기 세팅
-        $('input[type=range].rangeInput').on('change', function(event) {
-            $('input[type=range].rangeInput').val(event.target.value);
+        $('input[type=range].rangeInput').on('change', function(e) {
+            $('input[type=range].rangeInput').val(e.target.value);
             effectRange($('input[type=range].rangeInput'));
-         })
+        })
 
         $('input[type=range].rangeInput').val(4);
         effectRange($('input[type=range].rangeInput'));
 
         reqSearch();
+
     })
 
-function reqSearch(e) {
-    let target = $('main.container section.content article');
-    let searchKeyword = $('.search-input').val();
+    function reqSearch(e) {
+        let target = $('main.container section.content article');
+        let searchKeyword = $('.search-input').val();
 
-    if(e !== undefined) {
-        // trigger 요청
-        if(e.isTrigger === 3) {
-            searchKeyword = $('input[name=kwd]').val();
-        }
-
-        if(e.target.className.includes('detail_search-btn')) {
-            setFilterCondition();
-        }
-    }
-
-    if(searchKeyword.trim().length == 0) {
-        printNoKeyword();
-        return;
-    }
-
-    let sendData = {
-        kwd: searchKeyword,
-        prevKwd: [''],
-        srchArea: [''],
-        collapseCd: $('div.total-menu ul li.on').data('searchCollapseCd'),
-        size: 10,
-        sort: $('input[name=detail_sort]:checked').val(),
-        reSrchYn: 'N',
-        period : $('input[name=detail_date]:checked').val(),
-        page: $('input[name=selectedPage]').val() ? $('input[name=selectedPage]').val() : 1
-    }
-
-    // 검색 영역
-    let searchAreaList = [];
-    if(!$('input[id=filter_area-all]').prop('checked')) {
-        $.each($('input[name=filter_area]:checked'), function(index, item) {
-            searchAreaList.push($(item).val());
-        })
-    } else {
-        searchAreaList.push($('input[id=filter_area-all]').val());
-    }
-    sendData['srchArea'] = searchAreaList;
-
-    // 결과 내 재검색
-    if($('input#research').prop('checked')) {
-        if($('input[name=prevKwd]').val() != '') {
-            $('input[name=prevKwd]').val($('input[name=prevKwd]').val() + ',' +$('input[name=kwd]').val());
-        } else {
-            $('input[name=prevKwd]').val($('input[name=kwd]').val());
-        }
-
-        $('input[name=kwd]').val($('input[name=prevKwd]').val());
-
-        sendData['reSrchYn'] = 'Y';
-
-        let prevKwdList = [];
-        $.each($('input[name=prevKwd]').val().split(","), function(index, item) {
-            prevKwdList.push(item);
-        })
-
-        sendData['prevKwd'] = prevKwdList;
-
-    } else {
-        $('input[name=prevKwd]').val('');
-    }
-    $('input[name=kwd]').val(searchKeyword);
-
-
-    // 상세검색 내 첨부파일
-    let attachList = [];
-    if(!($('input#detail_file-all').prop('checked'))) {
-        $.each($('input[name=detail_file]:checked'), function(index, item) {
-            attachList.push($(item).val());
-        })
-    }
-    sendData['attachedType'] = attachList;
-
-    // 필터 기간 직접입력 검색
-    if(e !== undefined ) {
-        if(e.target.className.includes('filter_period-search-btn')
-            || $('input[id=detail_date-self]').prop('checked')) {
-            let endDtm = $('input[name=detail_date-self-end]').val();
-            let startDtm = $('input[name=detail_date-self-start]').val();
-            if (startDtm === '') {
-                return;
+        if(e !== undefined) {
+            e.preventDefault();
+            // trigger 요청
+            if(e.isTrigger === 3) {
+                searchKeyword = $('input[name=kwd]').val();
             }
-            sendData['regDtmYn'] = 'Y';
-            sendData['regStartDtm'] = startDtm;
-            sendData['regEndDtm'] = endDtm;
+
+            if(e.target.className.includes('detail_search-btn')) {
+                setFilterCondition();
+            }
         }
-    }
 
-    /* Aggregation 파라미터 설정 */
-    let filterOption = {};
-    $.each($('div#aggregation dl'), function(index, filter) {
-        let field = '';
-        let checkedValue = [];
+        if(searchKeyword.trim().length == 0) {
+            printNoKeyword();
+            return;
+        }
 
-        if($(filter).find('input[type=checkbox]:checked').length > 0) {
-            field = $(filter).data('name');
-            $.each($(filter).find('input[type=checkbox]:checked'), function(index, item) {
-                checkedValue.push($(item).val());
+        let sendData = {
+            kwd: searchKeyword,
+            prevKwd: [''],
+            srchArea: [''],
+            collapseCd: $('div.total-menu ul li.on').data('searchCollapseCd'),
+            size: 10,
+            sort: $('input[name=detail_sort]:checked').val(),
+            reSrchYn: 'N',
+            period : $('input[name=detail_date]:checked').val(),
+            page: $('input[name=selectedPage]').val() ? $('input[name=selectedPage]').val() : 1
+        }
+
+        // 검색 영역
+        let searchAreaList = [];
+        if(!$('input[id=filter_area-all]').prop('checked')) {
+            $.each($('input[name=filter_area]:checked'), function(index, item) {
+                searchAreaList.push($(item).val());
             })
-            filterOption[field] = checkedValue;
+        } else {
+            searchAreaList.push($('input[id=filter_area-all]').val());
         }
-    })
+        sendData['srchArea'] = searchAreaList;
 
-    sendData['filterOption'] = filterOption
-
-    console.log(sendData);
-
-    $.ajax({
-        url: '/search.json',
-        type: 'POST',
-        data: JSON.stringify(sendData),
-        contentType: 'application/json; charset=utf-8',
-        timeout: 10000,
-        success: function(data) {
-            console.log(data);
-
-            if(e === undefined) {
-                // enter
-                target.empty();
+        // 결과 내 재검색
+        if($('input#research').prop('checked')) {
+            if($('input[name=prevKwd]').val() != '') {
+                $('input[name=prevKwd]').val($('input[name=prevKwd]').val() + ',' +$('input[name=kwd]').val());
             } else {
-                if (!$(e.currentTarget).hasClass('btn-more-list')) {
+                $('input[name=prevKwd]').val($('input[name=kwd]').val());
+            }
+
+            $('input[name=kwd]').val($('input[name=prevKwd]').val());
+
+            sendData['reSrchYn'] = 'Y';
+
+            let prevKwdList = [];
+            $.each($('input[name=prevKwd]').val().split(","), function(index, item) {
+                prevKwdList.push(item);
+            })
+
+            sendData['prevKwd'] = prevKwdList;
+
+        } else {
+            $('input[name=prevKwd]').val('');
+        }
+        $('input[name=kwd]').val(searchKeyword);
+
+
+        // 상세검색 내 첨부파일
+        let attachList = [];
+        if(!($('input#detail_file-all').prop('checked'))) {
+            $.each($('input[name=detail_file]:checked'), function(index, item) {
+                attachList.push($(item).val());
+            })
+        }
+        sendData['attachedType'] = attachList;
+
+        // 필터 기간 직접입력 검색
+        if(e !== undefined ) {
+            if(e.target.className.includes('filter_period-search-btn')
+                || $('input[id=detail_date-self]').prop('checked')) {
+                let endDtm = $('input[name=detail_date-self-end]').val();
+                let startDtm = $('input[name=detail_date-self-start]').val();
+                if (startDtm === '') {
+                    return;
+                }
+                sendData['regDtmYn'] = 'Y';
+                sendData['regStartDtm'] = startDtm;
+                sendData['regEndDtm'] = endDtm;
+            }
+        }
+
+        /* Aggregation 파라미터 설정 */
+        let filterOption = {};
+        $.each($('div#pc div.aggregation dl'), function(index, filter) {
+            let field = '';
+            let checkedValue = [];
+
+            if($(filter).find('input[type=checkbox]:checked').length > 0) {
+                field = $(filter).data('name');
+                $.each($(filter).find('input[type=checkbox]:checked'), function(index, item) {
+                    checkedValue.push($(item).val());
+                })
+                filterOption[field] = checkedValue;
+            }
+        })
+
+        sendData['filterOption'] = filterOption
+
+        console.log(sendData);
+
+        $.ajax({
+            url: '/search.json',
+            type: 'POST',
+            data: JSON.stringify(sendData),
+            contentType: 'application/json; charset=utf-8',
+            timeout: 10000,
+            success: function(data) {
+                console.log(data);
+
+                if(e === undefined) {
+                    // enter
                     target.empty();
                 } else {
-                    $('section.content article div.box-area button.btn-more-list').remove();
+                    if (!$(e.currentTarget).hasClass('btn-more-list')) {
+                        target.empty();
+                    } else {
+                        $('section.content article div.box-area button.btn-more-list').remove();
+                    }
+                }
+
+                printSections(target, data.result);
+
+                $.each(Object.keys(filterOption), function(index, key) {
+                    $.each(filterOption[key], function(index, value) {
+                        $('input[name="agg_'+ key +'_'+ value +'"]').prop('checked', true);
+                    })
+                });
+            },
+            error: function (data, xhr, responseText) {
+                if(data.responseText.status == 1) {
+                    // TODO - error page
+                    /*$('html').load('error/4xx');*/
                 }
             }
+        })
+    }
 
-            printSections(target, data.result);
-
-            $.each(Object.keys(filterOption), function(index, key) {
-                $.each(filterOption[key], function(index, value) {
-                    $('input[name="agg_'+ key +'_'+ value +'"]').prop('checked', true);
-                })
-            });
-        },
-        error: function (data, xhr, responseText) {
-            if(data.responseText.status == 1) {
-                // TODO - error page
-                /*$('html').load('error/4xx');*/
-            }
-        }
-    })
-}
-
-// 자동완성 API 호출
-function reqAutoComplete() {
-    let keyword = $('.search-input').val();
-}
+    // 자동완성 API 호출
+    function reqAutoComplete() {
+        let keyword = $('.search-input').val();
+    }
 
 </script>
 <body>
@@ -274,7 +264,7 @@ function reqAutoComplete() {
                         <dt>키워드</dt>
                         <dd>
                             <div class="input-control">
-                                <input type="text" class="search-input" />
+                                <input type="text" class="search-input" value="<c:out value="${q}" />" />
                             </div>
                         </dd>
                     </dl>
@@ -523,7 +513,7 @@ function reqAutoComplete() {
 
                     <!-- PC: 검색 더보기 (통합검색, 직원검색, 사이트 ... ) -->
                     <!-- PC 버전 Filter -->
-                    <div class="total-search-detail">
+                    <div id="pc" class="total-search-detail">
                         <button type="button" class="tsd-more-btn">더보기</button>
                         <div class="total-search-detail__form">
                             <div class="total-search-detail__content">
@@ -598,7 +588,26 @@ function reqAutoComplete() {
                                             </div>
                                         </div>
                                         <div class="total-search-detail__btn">
-                                            <button class="btn enterdirectly-btn__pc">직접입력</button>
+                                            <button class="btn popup-btn">직접입력</button>
+                                            <div class="popup-wrap pc" style="top: 30px;">
+                                                <button type="button" class="btn-icon__close2 btn-close filter_period-close-btn">닫기</button>
+                                                <div class="header">
+                                                    <h2>기간</h2>
+                                                </div>
+                                                <section>
+                                                    <div class="date-picker__pc">
+                                                        <input type="date" name="filter_date-self-start" >
+                                                        <span class="dash">~</span>
+                                                        <div>
+                                                            <input type="date" name="filter_date-self-end">
+                                                        </div>
+                                                    </div>
+                                                </section>
+                                                <div class="btn-area">
+                                                    <button class="btn__blue--search filter_period-search-btn">검색</button>
+                                                    <button class="btn__darkgray--close btn-close filter_period-close-btn">닫기</button>
+                                                </div>
+                                            </div>
                                             <%--<div class="popup-wrap" style="top: 35px;">
                                                 <button type="button" class="btn-icon__close2 filter_period-close-btn">닫기</button>
                                                 <div class="header">
@@ -619,7 +628,7 @@ function reqAutoComplete() {
                                         </div>
                                     </dd>
                                 </dl>
-                                <div id="aggregation">
+                                <div class="aggregation">
 
                                 </div>
                             </div>
@@ -724,7 +733,7 @@ function reqAutoComplete() {
             
             <!-- Mobile, Tablet: 검색 더보기 (통합검색, 직원검색, 사이트 ... ) -->
             <!-- Mobile 상세검색 -->
-            <div class="total-search-detail">
+            <div id="mobile" class="total-search-detail">
                 <button type="button" class="tsd-more-btn on">더보기</button>
                 <div class="total-search-detail__form">
                     <div class="total-search-detail__content">
@@ -742,11 +751,42 @@ function reqAutoComplete() {
                         <dl>
                             <dt>영역</dt>
                             <dd>
-                                <div class="radio-group">
+                                <%--<div class="radio-group">
                                     <input id="mobile_area-all" type="radio" name="mobile_area" value="AREA01" checked/>
                                     <label for="mobile_area-all">전체</label>
                                     <input id="mobile_area-title" type="radio" name="mobile_area" value="AREA02"/>
                                     <label for="mobile_area-title">제목</label>
+                                </div>--%>
+                                <div class="select-box-area">
+                                    <button type="button" class="select-box-area__btn">전체</button>
+                                    <div class="select-box-area__content">
+                                        <ul>
+                                            <li>
+                                                <div class="checkbox">
+                                                    <input id="mobile_area-all" type="checkbox" name="mobile_area" value="AREA01" checked>
+                                                    <label for="mobile_area-all">전체</label>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="checkbox">
+                                                    <input id="mobile_area-title" type="checkbox" name="mobile_area" value="AREA02">
+                                                    <label for="mobile_area-title">제목</label>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="checkbox">
+                                                    <input id="mobile_area-content" type="checkbox" name="mobile_area" value="AREA03">
+                                                    <label for="mobile_area-content">본문</label>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="checkbox">
+                                                    <input id="mobile_area-attach" type="checkbox" name="mobile_area" value="AREA04">
+                                                    <label for="mobile_area-attach">첨부</label>
+                                                </div>
+                                            </li>
+                                        </ul>
+                                    </div>
                                 </div>
                             </dd>
                         </dl>
@@ -766,8 +806,8 @@ function reqAutoComplete() {
                                     </div>
                                 </div>
                                 <div class="total-search-detail__btn">
-                                    <button class="btn enterdirectly-btn__pc">직접입력</button>
-                                    <div class="popup-wrap popup-wrap__mobile popup-wrap">
+                                    <button class="btn popup-btn">직접입력</button>
+                                   <div class="popup-wrap popup-wrap__mobile popup-wrap">
                                         <button type="button" class="btn-icon__close2 btn-close mobile_period-close-btn">닫기</button>
                                         <div class="header">
                                             <h2>기간</h2>
@@ -780,13 +820,16 @@ function reqAutoComplete() {
                                             </div>
                                         </section>
                                         <div class="btn-area">
-                                            <button class="btn__blue--search">검색</button>
+                                            <button class="btn__blue--search filter_period-search-btn">검색</button>
                                             <button class="btn__darkgray--close btn-close mobile_period-close-btn">닫기</button>
                                         </div>
                                     </div>
                                 </div>
                             </dd>
                         </dl>
+                        <div class="aggregation">
+
+                        </div>
                     </div>
 <%--                    <div class="bottom-reset">
                         <button type="button" class="btn-reset">전체 초기화</button>
@@ -812,8 +855,8 @@ function reqAutoComplete() {
             <div class="inner">
                 <div class="search-form">
                     <div class="input-control">
-                        <input type="text" class="search-input"/>
-                        <button type="button" class="btn-setting">검색 세팅</button>
+                        <input type="text" class="search-input" value="<c:out value="${q}" />"/>
+                        <%--<button type="button" class="btn-setting">검색 세팅</button>--%>
 
                         <!-- 검색 box -->
                         <div class="box-setting">
@@ -863,8 +906,8 @@ function reqAutoComplete() {
             </div>
         </footer>
 
-        <!-- 2024-07-21 수정-->
-        <div class="popup-wrap popup-wrap__pc date_popup ">
+        <!-- 2024-07-21 수정 // 2024-08-02 삭제 -->
+        <%--<div class="popup-wrap popup-wrap__pc date_popup ">
             <button type="button" class="btn-icon__close2 btn-close filter_period-close-btn">닫기</button>
             <div class="header">
                 <h2>기간</h2>
@@ -880,7 +923,7 @@ function reqAutoComplete() {
                 <button class="btn__blue--search filter_period-search-btn">검색</button>
                 <button class="btn__darkgray--close btn-close filter_period-close-btn">닫기</button>
             </div>
-        </div>
+        </div>--%>
         <!-- // 2024-07-21 수정-->
     </div>
 </body>

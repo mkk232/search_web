@@ -39,7 +39,7 @@ function setFilterCondition() {
             $('input[name=filter_area][value="'+  $(item).val() +'"]').prop('checked', true);
         })
 
-        addFilterAreaText();
+        updateAreaText();
     }
 
     // sort
@@ -52,6 +52,9 @@ function setFilterCondition() {
         $('input[name=filter_date]').val(detailDateValue);
         effectRange($('input[name=filter_date]'));
     }
+
+    // attach
+    $('input[name^=agg_]').prop('checked', false);
 }
 
 /* null 일 경우 빈 스트링을 반환한다. */
@@ -64,7 +67,7 @@ function isNull(item) {
 }
 
 /* 필터 검색 영역의 텍스트를 추가한다. */
-function addFilterAreaText() {
+function updateAreaText() {
     let checkBoxAllCnt = $('input[name=filter_area][id!=filter_area-all]').length;
     let checkedCnt = $('input[name=filter_area][id!=filter_area-all]:checked').length;
     let areaText = '';
@@ -88,10 +91,35 @@ function initPagination() {
     $('input[name=selectedPage]').val(1);
 }
 
+/* 첨부파일 확장자 클래스를 설정한다. */
 function isEtcIcon(attachExt) {
-    let iconList = ['doc', 'docx', 'pptx', 'xls', 'xlsx', 'pdf', 'txt', 'psd'];
-    if(!iconList.includes(attachExt)) {
-        attachExt = 'etc';
-    }
-    return attachExt;
+    const iconList = ['doc', 'docx', 'ppt', 'pptx', 'xls', 'xlsx', 'pdf', 'txt', 'psd'];
+    const ext = attachExt.toLowerCase();
+    return iconList.includes(ext) ? ext : 'etc';
+}
+
+function addMenuList(menuId) {
+    let target = $('div.total-menu ul');
+    target.empty();
+
+    $.each(Object.keys(menuId), function(index, item) {
+        target.append(
+            $('<li />')
+                .attr('data-search-collapse-cd', menuId[item])
+                .append(
+                    $('<button type="button" />')
+                        .addClass('icon01')
+                        .append(
+                            $('<span />').text()
+                        )
+                )
+        )
+        /*
+        <li class="on" data-search-collapse-cd="99999">
+                                <button type="button" class="icon01">
+                                    <span>통합검색</span>
+                                </button>
+                            </li>
+         */
+    })
 }

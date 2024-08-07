@@ -911,22 +911,29 @@ footer .search-form .box-setting__buttom {
   gap: 0 15px;
 }
 .file-download a {
-  display: flex;
-  justify-content: flex-start;
-  align-items: center;
-  /*gap: 0 5px; 2024-07-19 하이라이팅 처리로 인해 제거 */
-  /*text-decoration: underline; 2024-07-30 첨부파일명 밑줄 제거 */
+  text-decoration: underline;
   color: #333;
+  font-size: 1.3rem;
+  cursor: pointer; /* 2024-08-02 파일 다운로드 기능 추가로 인해 포인터 추가 */
+}
+.file-download a em {
   font-size: 1.3rem;
 }
 .file-download a::before {
-  display: block;
+  position: relative;
+  top: 4px;
+  margin-right: 3px;
+  display: inline-block;
   width: 18px;
   height: 18px;
   content: "";
 }
 .file-download a.doc::before {
   background: url("../images/icon/icon-word.svg") no-repeat 0 0;
+  background-size: 18px;
+}
+.file-download a.ppt::before {
+  background: url("../images/icon/icon-pdf.svg") no-repeat 0 0;
   background-size: 18px;
 }
 .file-download a.pptx::before {
@@ -1008,6 +1015,10 @@ footer .search-form .box-setting__buttom {
   box-shadow: 4px 4px 4px rgba(0, 0, 0, 0.1);
 }
 
+.select-box-area {
+  position: relative;
+  width: 100%;
+}
 .select-box-area button {
   background: url("../images/icon/icon_related_arrow.svg") no-repeat top 50% right 10px;
   background-size: 10px 6px;
@@ -1031,19 +1042,28 @@ footer .search-form .box-setting__buttom {
   display: block;
 }
 .select-box-area__content {
+  position: absolute;
+  width: 100%;
+  top: 29px;
+  left: 0px;
+  z-index: 10;
   display: none;
-  position: relative;
   background-color: #fff;
   padding: 10px;
   border: 1px solid #DDDDDD;
   z-index: 1;
-  top: -2px;
 }
 .select-box-area__content ul li {
   margin-bottom: 10px;
 }
 .select-box-area__content ul li:last-child {
   margin-bottom: 0px;
+}
+@media only screen and (min-width: 1280px) {
+  .select-box-area__content {
+    position: relative;
+    top: -1px;
+  }
 }
 
 .date-picker input[type=date] {
@@ -1072,12 +1092,13 @@ footer .search-form .box-setting__buttom {
 .date-picker__period {
   display: flex;
   align-items: center;
+  width: 100%;
 }
 .date-picker__period input[type=date] {
   background: url("../images/icon/icon_calendar.svg") no-repeat top 50% right 10px;
   background-size: 16px;
   background-color: #fff;
-  width: 100%;
+  width: 46%;
   border-radius: 4px;
   padding: 0 10px;
   border: 1px solid #DDDDDD;
@@ -1097,6 +1118,34 @@ footer .search-form .box-setting__buttom {
   box-shadow: 4px 4px 4px rgba(0, 0, 0, 0.1);
 }
 .date-picker__period .dash {
+  margin: 0 4px;
+  width: 9px;
+  font-size: 1.4rem;
+}
+.date-picker__pc input[type=date] {
+  background: url("../images/icon/icon_calendar.svg") no-repeat top 50% right 10px;
+  background-size: 16px;
+  background-color: #fff;
+  width: 108px;
+  border-radius: 4px;
+  padding: 0 10px;
+  border: 1px solid #DDDDDD;
+  color: #333;
+  height: 30px;
+  font-size: 1.3rem;
+  outline: none;
+}
+.date-picker__pc input[type=date]::-webkit-calendar-picker-indicator {
+  opacity: 0;
+}
+.date-picker__pc input[type=date]:disabled {
+  color: #919191;
+  background-color: #F2F4F7;
+}
+.date-picker__pc input[type=date]:hover:not([disabled]), .date-picker__pc input[type=date]:focus:not([disabled]) {
+  box-shadow: 4px 4px 4px rgba(0, 0, 0, 0.1);
+}
+.date-picker__pc .dash {
   margin: 0 4px;
   width: 9px;
   font-size: 1.4rem;
@@ -1428,7 +1477,7 @@ footer .search-form .box-setting__buttom {
   position: absolute;
   top: 0px;
   left: 0px;
-  width: 287px;
+  width: 100%;
   padding: 12px 15px 20px;
   background-color: #fff;
   border: 1px solid #DDDDDD;
@@ -1465,6 +1514,22 @@ footer .search-form .box-setting__buttom {
   line-height: 2.3rem;
   color: #333;
   font-size: 1.3rem;
+}
+@media only screen and (min-width: 786px) {
+  .popup-wrap {
+    width: auto;
+  }
+}
+@media only screen and (min-width: 1280px) {
+  .popup-wrap {
+    width: 146px;
+    padding: 12px 8px 20px;
+  }
+  .popup-wrap .btn-area button {
+    width: 61px;
+    min-width: 61px;
+    padding: 0px;
+  }
 }
 
 .search-form {
@@ -1991,7 +2056,7 @@ footer .search-form .box-setting__buttom {
     left: 0px;
     width: 200px;
     height: 100vh;
-    padding: 15px;
+    padding: 15px 15px 100px 15px;
     background-color: #fff;
     border: 1px solid #ddd;
     overflow-y: auto;
@@ -2210,7 +2275,6 @@ footer .search-form .box-setting__buttom {
   }
 }
 @media only screen and (min-width: 1280px) and (min-width: 1280px) {
-/* 2024-07-17 확장자 파일 필터 style 제거
   .search-terms .total-wrap .total-search-detail__content .files ul {
     display: flex;
     flex-wrap: wrap;
@@ -2218,7 +2282,7 @@ footer .search-form .box-setting__buttom {
   .search-terms .total-wrap .total-search-detail__content .files ul li {
     width: 45%;
     margin-bottom: 0px;
-  }*/
+  }
   .search-terms .total-wrap .total-search-detail__content .org {
     display: block;
   }
@@ -2611,7 +2675,7 @@ footer .search-form .box-setting__buttom {
 }
 .search-terms .total-search-detail__btn .popup-wrap {
   top: 32px;
-  left: -74px;
+  left: 0px;
 }
 @media only screen and (min-width: 768px) {
   .search-terms .total-search-detail__btn {
@@ -2782,7 +2846,6 @@ footer .search-form .box-setting__buttom {
     display: none;
   }
 }
-
 .box-nodata {
   background-color: #fff;
   border: 1px solid #DDDDDD;
@@ -3039,6 +3102,7 @@ footer .search-form .box-setting__buttom {
 }
 .doc-result-box .item h3 strong a:hover {
   text-decoration: underline;
+  cursor: pointer; /* 2024-08-07 마우스 커서 추가 */
 }
 .doc-result-box .item h3 span {
   font-size: 1.4rem;
@@ -3216,15 +3280,12 @@ footer .search-form .box-setting__buttom {
   padding-top: 2px;
 }
 .staff-area .staff-item .staff-info__item > ul > li {
-  display: flex;
-  justify-content: flex-start;
-  align-items: center;
-  gap: 0 15px;
   font-size: 1.3rem;
   margin-bottom: 15px;
 }
 .staff-area .staff-item .staff-info__item > ul > li strong {
-  display: block;
+  margin-right: 15px;
+  display: inline-block;
   width: 45px;
   font-size: 1.3rem;
   font-weight: 700;
@@ -3581,4 +3642,14 @@ footer .search-form .box-setting__buttom {
   }
 }
 
-/*# sourceMappingURL=main.css.map */
+em {
+  font-weight: bold;
+  line-height: 2rem;
+  font-size: 1.4rem;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+
+/*# sourceMappingURL=main_new.css.map */

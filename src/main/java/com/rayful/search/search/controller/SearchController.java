@@ -1,6 +1,9 @@
 package com.rayful.search.search.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rayful.search.common.vo.ResponseMessageVO;
+import com.rayful.search.config.JavascriptConfig;
 import com.rayful.search.search.service.SearchService;
 import com.rayful.search.search.vo.SearchVO;
 import lombok.extern.slf4j.Slf4j;
@@ -13,6 +16,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.xml.ws.Response;
 import java.io.IOException;
 import java.net.ConnectException;
 import java.net.URLEncoder;
@@ -24,6 +28,12 @@ public class SearchController {
 
     @Autowired
     private SearchService searchService;
+
+    @Autowired
+    private JavascriptConfig javascriptConfig;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     /**
      * 검색 페이지 이동
@@ -60,7 +70,6 @@ public class SearchController {
         request.getServletContext().getRequestDispatcher("/search").forward(request, response);
     }
 
-
     /**
      * 검색 페이지 이동
      */
@@ -71,12 +80,13 @@ public class SearchController {
 
     @GetMapping("/search")
     public ModelAndView search(@RequestParam(value = "q", required = false) String q) {
-
         ModelAndView mav = new ModelAndView("search");
         String keyword = q;
         if(keyword == null || keyword.trim().length() == 0) {
             keyword = "";
         }
+
+        mav.addObject("jsConfig", this.javascriptConfig);
         mav.addObject("q", keyword);
         return mav;
     }

@@ -30,6 +30,8 @@ public class ConvertUtils {
 
                             addViewDocLink(docMap, sectionCode);
 
+                            addViewDocDownloadLink(docMap);
+
                         }
                     }
                 }
@@ -41,6 +43,7 @@ public class ConvertUtils {
 
         return apiResultMap;
     }
+
 
     private static void addViewDate(Map<String, Object> docMap)  {
         try {
@@ -70,7 +73,7 @@ public class ConvertUtils {
         }
     }
 
-    // 첨부 하이라이트 -> 본문 하이라이트 -> 첨부 -> 본문
+    // 본문 하이라이트 -> 첨부 하이라이트 -> 본문 -> 첨부
     private static void addViewContent(Map<String, Object> docMap) {
         String viewContent = (String) docMap.get("content.highlight");
 
@@ -116,6 +119,28 @@ public class ConvertUtils {
             docMap.put("view_docLink", "#");
         }
     }
+
+    @SuppressWarnings("unchecked")
+    private static void addViewDocDownloadLink(Map<String, Object> docMap) {
+        String attachNm = null;
+        String docId = null;
+        String nsfName = null;
+        String frontPath = "https://pt.phakr.com/";
+        List<Map<String, Object>> attachList = (List<Map<String, Object>>) docMap.get("attach_info");
+        if(attachList != null) {
+            docId = (String) docMap.get("docid");
+            nsfName = (String) docMap.get("nsf_name");
+
+            for(Map<String, Object> attachMap : attachList) {
+                attachNm = (String) attachMap.get("attach_nm");
+                String parsedAttachNm = attachNm.replace("<em>", "").replace("</em>", "");
+
+                String downloadUrl = frontPath + nsfName + "/0/" + docId + "/$FILE/" + parsedAttachNm;
+                attachMap.put("view_downloadUrl", downloadUrl);
+            }
+        }
+    }
+
 
     @SuppressWarnings("unchecked")
     private static Map<String, List<Object>> getViewAggregation(Map<String, List<Object>> newAggregationMap,
