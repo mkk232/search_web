@@ -28,21 +28,6 @@ $('input[type=checkbox]').on('click', function() {
     }
 })
 
-// 탭 클릭 이벤트
-$('div.total-menu ul li').on('click', function() {
-    initPagination();
-
-    if(!$(this).hasClass('on')) {
-        $('div.total-menu ul li.on').removeClass('on');
-        $(this).addClass('on');
-
-        // mobile / tablet
-        $('button.total-wrap__btn').text($(this).find('span').text())
-
-        $($('div.input-control button.search-btn')[0]).trigger('click');
-    }
-})
-
 
 // 키워드 입력 이벤트 ( 상세검색, 하단 검색 박스 동기화 )
 $('.search-input').on('keyup', function() {
@@ -69,6 +54,7 @@ $(document).on('click', 'div.paging-wrap button', function() {
 
     $('input[name=selectedPage]').val(selectedNo);
     reqSearch();
+    $('html').scrollTop(0);
 })
 
 // 모바일 페이징 클릭 이벤트
@@ -96,6 +82,12 @@ $(document).on('click', 'div.doc-result-box h3 strong a', function() {
 
     window.open(url, name, option);
 })
+
+$('input[type=range].rangeInput').on('click', function(e) {
+    $('input[type=range].rangeInput').val(e.target.value);
+    effectRange($('input[type=range].rangeInput'));
+})
+
 
 /* Main 이벤트 */
 

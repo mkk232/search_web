@@ -1,9 +1,14 @@
 package com.rayful.search.search.vo;
 
 import lombok.Data;
+import org.springframework.web.util.HtmlUtils;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 import java.util.Map;
 
 @Data
@@ -64,8 +69,10 @@ public class SearchVO {
         }
     }
 
-    public void setUserInfo(String userNameList) {
-        this.acl01 = userNameList.split(", ");
+    public void setUserInfo(String userNameList) throws UnsupportedEncodingException {
+        String decoded = URLDecoder.decode(userNameList, "UTF-8");
+        String unescaped  = HtmlUtils.htmlUnescape(decoded);
+        this.acl01 = unescaped.split(", ");
         this.userId = this.acl01[0];
     }
 }

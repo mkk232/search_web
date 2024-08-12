@@ -1,14 +1,19 @@
 package com.rayful.search.common.utils;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.jasper.tagplugins.jstl.core.Url;
 
 import java.net.ConnectException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
 @Slf4j
 public class ConvertUtils {
+
+//    private static final String COMPANY_URL
     private ConvertUtils() {}
 
     @SuppressWarnings("unchecked")
@@ -17,21 +22,22 @@ public class ConvertUtils {
         if(resultMap != null) {
             if (Integer.parseInt(String.valueOf(resultMap.get("totalCnt"))) > 0) {
                 for (Map<String, Object> sectionMap : (List<Map<String, Object>>) resultMap.get("sectionList")) {
-                    if (Integer.parseInt(String.valueOf(sectionMap.get("sectionCnt"))) > 0
-                            && (((String) sectionMap.get("indexName")).startsWith("idx_01_"))
-                                || ((String) sectionMap.get("indexName")).startsWith("idx_02_")) {
+                    String sectionCode = (String) sectionMap.get("sectionCode");
+                    for (Map<String, Object> docMap : (List<Map<String, Object>>) sectionMap.get("docList")) {
+                        if(Integer.parseInt(String.valueOf(sectionMap.get("sectionCnt"))) > 0) {
 
-                        String sectionCode = (String) sectionMap.get("sectionCode");
-                        for (Map<String, Object> docMap : (List<Map<String, Object>>) sectionMap.get("docList")) {
+                            if ((((String) sectionMap.get("indexName")).startsWith("idx_01_"))
+                                    || ((String) sectionMap.get("indexName")).startsWith("idx_02_")) {
+                                addViewDate(docMap);
 
-                            addViewDate(docMap);
+                                addViewContent(docMap);
 
-                            addViewContent(docMap);
+                                addViewDocLink(docMap, sectionCode);
 
-                            addViewDocLink(docMap, sectionCode);
-
-                            addViewDocDownloadLink(docMap);
-
+                                addViewDocDownloadLink(docMap);
+                            } else {
+                                addViewPersonImgLink(docMap);
+                            }
                         }
                     }
                 }
@@ -44,7 +50,7 @@ public class ConvertUtils {
         return apiResultMap;
     }
 
-
+    /* 수정자 / 작성자 비교 후 추가 */
     private static void addViewDate(Map<String, Object> docMap)  {
         try {
             String regDtm = (String) docMap.get("reg_dtm");
@@ -75,10 +81,10 @@ public class ConvertUtils {
 
     // 본문 하이라이트 -> 첨부 하이라이트 -> 본문 -> 첨부
     private static void addViewContent(Map<String, Object> docMap) {
-        String viewContent = (String) docMap.get("content.highlight");
+        String viewContent = (String) docMap.get("content_highlight");
 
         if (viewContent == null || viewContent.isEmpty()) {
-            viewContent = (String) docMap.get("attach_body.highlight");
+            viewContent = (String) docMap.get("attach_body_highlight");
         }
 
         if (viewContent == null || viewContent.isEmpty()) {
@@ -91,12 +97,12 @@ public class ConvertUtils {
 
         if (viewContent == null || viewContent.isEmpty()) {
             viewContent = "";
-            log.warn("[{}] Content must be not null", docMap.get("title"));
         }
 
         docMap.put("view_content", viewContent);
     }
 
+    /* 문서 링크 추가 */
     private static void addViewDocLink(Map<String, Object> docMap, String sectionCode) {
         String fullPath = "";
         String frontPath = "";
@@ -120,6 +126,7 @@ public class ConvertUtils {
         }
     }
 
+    /* 첨부파일 다운로드 링크 추가 */
     @SuppressWarnings("unchecked")
     private static void addViewDocDownloadLink(Map<String, Object> docMap) {
         String attachNm = null;
@@ -127,17 +134,29 @@ public class ConvertUtils {
         String nsfName = null;
         String frontPath = "https://pt.phakr.com/";
         List<Map<String, Object>> attachList = (List<Map<String, Object>>) docMap.get("attach_info");
-        if(attachList != null) {
+        if(attachList != null && attachList.size() > 0) {
             docId = (String) docMap.get("docid");
             nsfName = (String) docMap.get("nsf_name");
 
             for(Map<String, Object> attachMap : attachList) {
                 attachNm = (String) attachMap.get("attach_nm");
-                String parsedAttachNm = attachNm.replace("<em>", "").replace("</em>", "");
 
-                String downloadUrl = frontPath + nsfName + "/0/" + docId + "/$FILE/" + parsedAttachNm;
+                String downloadUrl = frontPath + nsfName + "/0/" + docId + "/$FILE/" + attachNm;
                 attachMap.put("view_downloadUrl", downloadUrl);
             }
+        }
+    }
+
+    /* 임직원 이미지 링크 추가 */
+    private static void addViewPersonImgLink(Map<String, Object> docMap) {
+        // https://pt.phakr.com/egate/global/eip/home/pref.nsf/photo_by_empno/5222010/$file/5222010.jpg
+        String personId = (String) docMap.get("person_id");
+        if(personId != null) {
+            String frontPath = "https://pt.phakr.com/egate/global/eip/home/pref.nsf/photo_by_empno/";
+            String nsfName = (String) docMap.get("nsf_name");
+
+            String viewUrl = frontPath + personId + "/$file/" + personId + ".jpg";
+            docMap.put("view_personImg", viewUrl);
         }
     }
 
@@ -182,7 +201,6 @@ public class ConvertUtils {
             newAggregationMap.put(fieldName, bucketList);
         }
 
-        log.debug("newAggregationMap: {}", newAggregationMap);
 
         return newAggregationMap;
     }

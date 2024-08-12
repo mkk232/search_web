@@ -732,6 +732,7 @@ footer .search-form .box-setting__buttom {
 }
 .btn-icon-text__more:hover:not([disabled]), .btn-icon-text__more:focus:not([disabled]) {
   text-decoration: underline;
+  cursor: pointer; /* 2024-08-09 마우스 커서 변경 */
 }
 .btn-icon-text__more:disabled {
   opacity: 0.6;
@@ -2125,7 +2126,7 @@ footer .search-form .box-setting__buttom {
     height: 14px;
     content: "";
   }
-  .search-terms .total-wrap .total-menu ul li button.icon05::before {
+  /*.search-terms .total-wrap .total-menu ul li button.icon05::before {
     background: url("../images/icon/icon_total_05.svg") no-repeat 0 0;
     background-size: 100%;
     width: 14px;
@@ -2145,7 +2146,7 @@ footer .search-form .box-setting__buttom {
     width: 14px;
     height: 14px;
     content: "";
-  }
+  }*/
   .search-terms .total-wrap .total-menu ul li button span {
     font-size: 1.5rem;
     font-weight: 400;
@@ -2184,7 +2185,7 @@ footer .search-form .box-setting__buttom {
     height: 14px;
     content: "";
   }
-  .search-terms .total-wrap .total-menu ul li.on button.icon05::before {
+ /* .search-terms .total-wrap .total-menu ul li.on button.icon05::before {
     background: url("../images/icon/icon_total_05_on.svg") no-repeat 0 0;
     background-size: 100%;
     width: 14px;
@@ -2204,7 +2205,7 @@ footer .search-form .box-setting__buttom {
     width: 14px;
     height: 14px;
     content: "";
-  }
+  }*/
   .search-terms .total-wrap .total-menu ul li.on button .icon img {
     fill: #fff;
   }

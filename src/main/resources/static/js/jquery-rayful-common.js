@@ -98,28 +98,25 @@ function isEtcIcon(attachExt) {
     return iconList.includes(ext) ? ext : 'etc';
 }
 
-function addMenuList(menuId) {
-    let target = $('div.total-menu ul');
-    target.empty();
+function isShowDetail(menuMap) {
+    let selectedTap = getCurrentCollapseCd();
 
-    $.each(Object.keys(menuId), function(index, item) {
-        target.append(
-            $('<li />')
-                .attr('data-search-collapse-cd', menuId[item])
-                .append(
-                    $('<button type="button" />')
-                        .addClass('icon01')
-                        .append(
-                            $('<span />').text()
-                        )
-                )
-        )
-        /*
-        <li class="on" data-search-collapse-cd="99999">
-                                <button type="button" class="icon01">
-                                    <span>통합검색</span>
-                                </button>
-                            </li>
-         */
-    })
+    if(menuMap[selectedTap].detail == 'N') {
+        $('button.btn-detail-search').hide();
+        $('div.total-search-detail__form').hide();
+        $('button.tsd-more-btn').hide();
+    } else {
+        $('button.btn-detail-search').show();
+        $('div.total-search-detail__form').show();
+        $('button.tsd-more-btn').show();
+    }
+}
+
+function getCurrentCollapseCd() {
+    let selectedTap = $('div.total-menu ul').find('li.on').data('searchCollapseCd');
+    if(selectedTap === undefined) {
+        selectedTap = 99999;
+    }
+
+    return selectedTap;
 }

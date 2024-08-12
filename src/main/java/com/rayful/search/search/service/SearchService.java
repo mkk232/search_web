@@ -2,24 +2,15 @@ package com.rayful.search.search.service;
 
 import com.rayful.search.common.utils.ConvertUtils;
 import com.rayful.search.common.utils.HttpUtils;
-import com.rayful.search.common.vo.DetailSearchVO;
-import com.rayful.search.config.WebConfig;
 import com.rayful.search.search.vo.SearchVO;
-import lombok.extern.log4j.Log4j;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
 
 import java.net.ConnectException;
-import java.net.URI;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.time.temporal.TemporalAmount;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 
 @Slf4j
@@ -50,7 +41,6 @@ public class SearchService {
                 .block();
 
         ConvertUtils.convertResultMap(apiResultMap);
-        log.debug("after convert resultMap : {}", apiResultMap);
 
         return apiResultMap;
     }

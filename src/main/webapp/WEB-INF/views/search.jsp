@@ -10,10 +10,13 @@
     <title>PHA</title>
     <link rel="stylesheet" href="../assets/css/main.css">
     <script src="/js/lib/jquery.min.3.7.1.js"></script>
-    <script defer src="/js/jquery-rayful-common.js"></script>
     <script defer src="/js/jquery-rayful-event.js"></script>
-    <script defer src="/js/jquery-rayful-paging.js"></script>
+    <script defer src="/js/jquery-rayful-common.js"></script>
     <script defer src="/js/jquery-rayful-print.js"></script>
+
+    <!-- DOMPurify 라이브러리 추가 -->
+    <script src="/js/purify.min.js"></script>
+
 
 </head>
 <style>
@@ -22,23 +25,79 @@
     }
 </style>
 <script type="text/javascript">
-    $(document).ready(function () {
-        // 페이지 로드 시 필터 기간 Range 영역 초기 세팅
-        $('input[type=range].rangeInput').on('change', function(e) {
-            $('input[type=range].rangeInput').val(e.target.value);
-            effectRange($('input[type=range].rangeInput'));
-        })
+    const attachExt = ${attachExt};
+    const pagination = ${pagination};
+    const code = "<c:out value='${code}' />";
 
+    const menuMap = ${menuMap};
+    const entryMenuMap = Object.entries(menuMap);
+    entryMenuMap.sort((a, b) => a[1].orderBy - b[1].orderBy);
+
+    $(document).ready(function () {
+        printMenuList(entryMenuMap);
+
+        if(code !== "") {
+            $('div.total-menu ul li').removeClass('on');
+            $.each($('div.total-menu ul li'), function(index, menu) {
+                if(code == $(menu).data('searchCollapseCd')) {
+                    $(this).addClass('on');
+                }
+            })
+        }
+
+        // 페이지 로드 시 필터 기간 Range 영역 초기 세팅
         $('input[type=range].rangeInput').val(4);
         effectRange($('input[type=range].rangeInput'));
 
         reqSearch();
-
     })
+
+    function printMenuList(entryMenuMap) {
+        let target = $('div.total-menu ul');
+
+        let selectedTap = getCurrentCollapseCd();
+
+        target.empty();
+
+       $.each(Object.keys(entryMenuMap), function(index, item) {
+            target.append(
+                $('<li />')
+                    .attr('data-search-collapse-cd', entryMenuMap[item][0])
+                    .addClass(selectedTap == entryMenuMap[item][0] ? 'on' : '')
+                    .append(
+                        $('<button type="button" />')
+                            .addClass(entryMenuMap[item][1].icon)
+                            .append(
+                                $('<span />').text(entryMenuMap[item][1].name)
+                            )
+                    )
+            )
+        })
+
+        // 탭 클릭 이벤트
+        $(document).on('click', 'div.total-menu ul li', function() {
+            console.log('tab click');
+            initPagination();
+
+            if(!$(this).hasClass('on')) {
+                $('div.total-menu ul li.on').removeClass('on');
+                $(this).addClass('on');
+
+                // mobile / tablet
+                $('button.total-wrap__btn').text($(this).find('span').text())
+
+                $($('div.input-control button.search-btn')[0]).trigger('click');
+
+                isShowDetail(menuMap);
+
+                $('html').scrollTop(0);
+            }
+        })
+    }
 
     function reqSearch(e) {
         let target = $('main.container section.content article');
-        let searchKeyword = $('.search-input').val();
+        let searchKeyword = DOMPurify.sanitize($('.search-input').val());
 
         if(e !== undefined) {
             e.preventDefault();
@@ -61,8 +120,8 @@
             kwd: searchKeyword,
             prevKwd: [''],
             srchArea: [''],
-            collapseCd: $('div.total-menu ul li.on').data('searchCollapseCd'),
-            size: 10,
+            collapseCd: getCurrentCollapseCd(),
+            size: pagination.defaultPageSize,
             sort: $('input[name=detail_sort]:checked').val(),
             reSrchYn: 'N',
             period : $('input[name=detail_date]:checked').val(),
@@ -98,7 +157,6 @@
             })
 
             sendData['prevKwd'] = prevKwdList;
-
         } else {
             $('input[name=prevKwd]').val('');
         }
@@ -129,7 +187,7 @@
             }
         }
 
-        /* Aggregation 파라미터 설정 */
+        /* Aggregation */
         let filterOption = {};
         $.each($('div#pc div.aggregation dl'), function(index, filter) {
             let field = '';
@@ -258,7 +316,7 @@
                 <!-- 자동완성 -->
 
                 <!-- 상세검색 Modal -->
-                <div class="box-detail">
+                <div class="box-detail" /> >
                     <button type="button" class="btn-icon__close btn-detail-close">닫기</button>
                     <dl class="first">
                         <dt>키워드</dt>
@@ -461,16 +519,17 @@
                     <!-- 통합검색 -->
                     <div class="total-menu">
                         <ul>
+                            <%--
                             <li class="on" data-search-collapse-cd="99999">
                                 <button type="button" class="icon01">
                                     <span>통합검색</span>
                                 </button>
                             </li>
-<%--                            <li data-search-collapse-cd="10000">
+                            <li data-search-collapse-cd="10000">
                                 <button type="button" class="icon02">
                                     <span>문서관리</span>
                                 </button>
-                            </li>--%>
+                            </li>
                             <li data-search-collapse-cd="20000">
                                 <button type="button" class="icon02">
                                     <span>전자결재</span>
@@ -486,7 +545,6 @@
                                     <span>임직원</span>
                                 </button>
                             </li>
-                            <%--
                             <li data-collapse-cd="60000">
                                 <button type="button" class="icon03">
                                     <span>사이트</span>

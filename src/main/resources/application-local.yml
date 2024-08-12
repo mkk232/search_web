@@ -1,0 +1,56 @@
+server:
+  port: 8001
+  ssl:
+    key-store: classpath:ssl/keystore.jks
+    key-store-type: JKS
+    key-store-password: "Phait136"
+
+spring:
+  mvc:
+    view:
+      prefix: WEB-INF/views/
+      suffix: .jsp
+
+
+searchApi:
+  host: http://sch.phakr.com:8002/api/search
+
+logging:
+  file:
+    path: C:\Workspace_codial\search_web\logs
+    name: search_web
+    level: INFO
+
+# jsp config
+javascript:
+  menu:
+    99999:
+      orderBy: 1
+      name: 통합검색
+      icon: icon01
+      detail: Y
+    20000:
+      orderBy: 2
+      name: 전자결재
+      icon: icon02
+      detail: Y
+    40000:
+      orderBy: 3
+      name: 표준관리
+      icon: icon03
+      detail: Y
+    50000:
+      orderBy: 4
+      name: 임직원
+      icon: icon04
+      detail: N
+
+
+  attach_ext:
+    [doc, docx, ppt, pptx, xls, xlsx, pdf, txt, psd]
+
+  pagination:
+    defaultPageSize: 10
+    pageBlockSize: 10
+    moreViewSize: 40
+

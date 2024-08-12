@@ -15,19 +15,15 @@ function printSections(target, data) {
             if(section.sectionCnt > 0) {
                 printSectionHeader(target, section);
 
-                if(section.sectionCode == 10000 && section.indexName == "idx_01_edms") {
-                    printDocument(target, section);
-                } else if(section.sectionCode == 20000 && section.indexName == "idx_02_eapproval") {
-                    printDocument(target, section);
-                } else if(section.sectionCode == 40000 && section.indexName == "idx_02_regulation") {
-                    printDocument(target, section);
-                } else if(section.sectionCode == 50000 && section.indexName == "idx_03_people") {
+                if(section.sectionCode == 50000 && section.indexName == "idx_03_people") {
                     printPeople(target, section);
+                } else {
+                    printDocument(target, section);
                 }
             }
         })
 
-        let currentTabCd = $('.total-menu ul li.on').data('searchCollapseCd');
+        let currentTabCd = getCurrentCollapseCd();
         if(currentTabCd != 99999) {
             printAggregation(aggTarget, data.result);
             printPagination(data.result.sectionList);
@@ -41,12 +37,13 @@ function printDocument(target, data) {
     let sectionName = data.sectionName;
     let sectionCode = data.sectionCode;
     let docList = '';
-    let collapseCd = $('div.total-menu li.on').data('searchCollapseCd');
+    let collapseCd = getCurrentCollapseCd();
 
 
     $.each(data.docList, function(index, doc) {
         let attachList = '';
         /* 첨부파일 */
+
         $.each(doc.attach_info, function(index, attach) {
             attachList += $('<div />')
                 .attr('data-attach-id', attach.attach_id)
@@ -56,7 +53,7 @@ function printDocument(target, data) {
                         .attr('href', attach.view_downloadUrl)
                         .attr('target', '_blank')
                         .addClass(isEtcIcon(attach.attach_ext))
-                        .html(attach.attach_nm)
+                        .html(DOMPurify.sanitize(attach.attach_nm_highlight ? attach.attach_nm_highlight : attach.attach_nm))
                 )[0].outerHTML;
         })
 
@@ -70,7 +67,7 @@ function printDocument(target, data) {
                                     $('<a />')
                                         .attr('data-url', doc.view_docLink)
                                         .addClass('color-third')
-                                        .html(doc.title)
+                                        .html(DOMPurify.sanitize(doc.title))
                             )
                     )
                     .append(
@@ -81,7 +78,7 @@ function printDocument(target, data) {
             .append(
                 $('<p />')
                     .addClass('txt')
-                    .html(doc.view_content)
+                    .html(DOMPurify.sanitize(doc.view_content))
             )
             .append(
                 attachList
@@ -113,7 +110,7 @@ function printDocument(target, data) {
             .append(
                 $('<p />')
                     .addClass('text-date')
-                    .html(isNull(doc.view_writer_nm) + '<b>|</b>' + doc.view_dtm)
+                    .html(DOMPurify.sanitize(isNull(doc.view_writer_nm) + '<b>|</b>' + doc.view_dtm))
             )[0].outerHTML;
     })
 
@@ -151,10 +148,9 @@ function printDocument(target, data) {
 
 // 임직원 검색
 function printPeople(target, data) {
-    let resize = $('input[name=resize]').val()
     let sectionName = data.sectionName;
     let sectionCode = data.sectionCode;
-    let collapseCd = $('div.total-menu li.on').data('searchCollapseCd');
+    let collapseCd = getCurrentCollapseCd();
 
     let peopleList = '';
     $.each(data.docList, function(index, doc) {
@@ -165,22 +161,23 @@ function printPeople(target, data) {
                     .addClass('thumnail')
                     .append(
                         $('<div />')
-                            /*.append(
+                            .append(
                                 $('<img />')
-                                    .attr('src', 'http://pt.phakr.com/egate/global/eip/home/pref.nsf/photo_by_empno/cordial1/$file/cordial1.jpg?open&date=2024-07-29')
+                                    .attr('src', doc.view_personImg)
                                     .attr('width', '100px')
                                     .attr('height', '128px')
-                            )*/
+                                    .attr('onerror', 'this.style.display="none"')
+                            )
                             .addClass('thumnail__img')
                     )
                     .append(
                         $('<p />')
                             .addClass('thumnail__txt')
                             .append(
-                                $('<strong />').html(doc.person_nm)
+                                $('<span />').html(DOMPurify.sanitize(doc.person_nm))
                             )
                             .append(
-                                $('<span />').text(doc.duty_nm)
+                                $('<span />').html(DOMPurify.sanitize(doc.duty_nm))
                             )
                     )
             )
@@ -194,23 +191,24 @@ function printPeople(target, data) {
                                 $('<ul />')
                                     .append(
                                         $('<li />')
-                                            .html('<strong>소속</strong> ' + doc.dept_nm)
+                                            .html(DOMPurify.sanitize('<strong>소속</strong> ' + doc.dept_nm))
                                     )
                                     .append(
                                         $('<li />')
-                                            .html('<strong>담당업무</strong> ' + doc.responsibility)
+                                            .html(DOMPurify.sanitize('<strong>담당업무</strong> ' + isNull(doc.responsibility)))
                                     )
                                     .append(
                                         $('<li />')
-                                            .html('<strong>내선번호</strong> ' + doc.phone)
+                                            .html(DOMPurify.sanitize('<strong>내선번호</strong> ' + doc.phone))
+                                    )
+                                    .append(
+
+                                        $('<li />')
+                                            .html(DOMPurify.sanitize('<strong>휴대폰</strong> ' + doc.cellphone))
                                     )
                                     .append(
                                         $('<li />')
-                                            .html('<strong>휴대폰</strong> ' + doc.cellphone)
-                                    )
-                                    .append(
-                                        $('<li />')
-                                            .html('<strong>이메일</strong> ' + doc.email)
+                                            .html(DOMPurify.sanitize('<strong>이메일</strong> ' + doc.email))
                                     )
                             )
                     )
@@ -310,7 +308,7 @@ function printAggregation(target, data) {
 
 function printPagination(data) {
     let resize = $('input[name=resize]').val();
-    let defaultPageSize = 10;
+    let defaultPageSize = pagination.defaultPageSize;
     let selectedPage = $('input[name=selectedPage]').val();
     if(selectedPage === undefined || selectedPage < 1) {
         selectedPage = 1;
@@ -319,7 +317,7 @@ function printPagination(data) {
     let totalCnt = parseInt($(data)[0].sectionCnt);
     let maxPageCnt = totalCnt / defaultPageSize < 1 ? 1 : Math.ceil(totalCnt / defaultPageSize);
 
-    let pageBlockSize = 10;
+    let pageBlockSize = pagination.pageBlockSize;
     let pageBlockNo = Math.floor((selectedPage - 1) / pageBlockSize);
 
     let start = pageBlockNo * pageBlockSize + 1;
@@ -355,7 +353,7 @@ function printPagination(data) {
                 .prepend(
                     $('<button class="btn-prev"/>')
                         .attr('data-page-no', (pageBlockNo - 1) * pageBlockSize + 1)
-                        .html('&lt;')
+                        .html(DOMPurify.sanitize('&lt;'))
                 )
         }
 
@@ -365,13 +363,13 @@ function printPagination(data) {
                 .append(
                     $('<button class="btn-next"/>')
                         .attr('data-page-no', (pageBlockNo + 1) * pageBlockSize + 1)
-                        .html('&gt;')
+                        .html(DOMPurify.sanitize('&gt;'))
                 )
         }
     }
 
     let currentCnt = (pageBlockSize * selectedPage) >= totalCnt ? totalCnt : (pageBlockSize * selectedPage);
-    let moreCnt = (totalCnt - currentCnt) > defaultPageSize ? defaultPageSize : (totalCnt - currentCnt)
+    let moreCnt = (totalCnt - currentCnt) > pagination.moreViewSize ? pagination.moreViewSize : (totalCnt - currentCnt)
     if(moreCnt > 0) {
         baseTarget.find('div.box-area')
             .append(
@@ -387,6 +385,7 @@ function printPagination(data) {
             )
     }
 }
+
 
 function printMoreButton(sectionName, sectionCode) {
     return $('<div />')
@@ -431,7 +430,7 @@ function printSearchInfo(target, data) {
                 $('<h2 />')
                     .addClass('total-tit')
                     .html(
-                        searchInfo
+                        DOMPurify.sanitize(searchInfo)
                     )
             )
             .append(
@@ -440,14 +439,14 @@ function printSearchInfo(target, data) {
                     .append(
                         $('<strong />')
                             .addClass('txt-total')
-                            .html('총 <span class="num">'+ data.totalCnt +'</span> 건')
+                            .html(DOMPurify.sanitize('총 <span class="num">'+ data.totalCnt +'</span> 건'))
                     )
             )
     )
 }
 
 function printSectionHeader(target, data) {
-    let collapseCd = $('div.total-menu li.on').data('searchCollapseCd');
+    let collapseCd = getCurrentCollapseCd();
 
     /* 모바일 더보기 클릭 시 헤더 출력 방지 */
     if(collapseCd !== 99999 &&
@@ -540,7 +539,7 @@ function printNoResult(target, data) {
                     .append(
                         $('<p />')
                             .addClass('tit')
-                            .html(searchInfo)
+                            .html(DOMPurify.sanitize(searchInfo))
                     )
             )
             .append(

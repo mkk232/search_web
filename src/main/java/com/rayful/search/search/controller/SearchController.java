@@ -1,7 +1,8 @@
 package com.rayful.search.search.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.rayful.search.common.vo.ResponseMessageVO;
 import com.rayful.search.config.JavascriptConfig;
 import com.rayful.search.search.service.SearchService;
@@ -18,6 +19,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.ws.Response;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.ConnectException;
 import java.net.URLEncoder;
 import java.util.Map;
@@ -79,15 +81,27 @@ public class SearchController {
     }
 
     @GetMapping("/search")
-    public ModelAndView search(@RequestParam(value = "q", required = false) String q) {
+    public ModelAndView search(@RequestParam(value = "q", required = false) String q,
+                               @RequestParam(value = "t", required = false) String t) {
+
         ModelAndView mav = new ModelAndView("search");
         String keyword = q;
         if(keyword == null || keyword.trim().length() == 0) {
             keyword = "";
         }
 
-        mav.addObject("jsConfig", this.javascriptConfig);
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+
+        String jsonMenu = gson.toJson(this.javascriptConfig.getMenu());
+        String jsonPagination = gson.toJson(this.javascriptConfig.getPagination());
+        String jsonAttachExt = gson.toJson(this.javascriptConfig.getAttachExt());
+
+        mav.addObject("menuMap", jsonMenu);
+        mav.addObject("pagination", jsonPagination);
+        mav.addObject("attachExt", jsonAttachExt);
         mav.addObject("q", keyword);
+        mav.addObject("code", t);
+
         return mav;
     }
 
@@ -98,7 +112,7 @@ public class SearchController {
     @PostMapping("/search.json")
     public ResponseEntity<ResponseMessageVO> getSearch(@RequestBody SearchVO searchVO,
                                                        @CookieValue(value = "LtpaToken", required = false) String cookie,
-                                                       @CookieValue(value = "usernamelist", required = false) String userNameList) {
+                                                       @CookieValue(value = "usernamelist", required = false) String userNameList) throws UnsupportedEncodingException {
 
         log.debug("cookie: {} ", cookie);
         log.debug("userNameList : {} ", userNameList);
