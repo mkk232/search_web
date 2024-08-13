@@ -7,15 +7,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PHA</title>
+    <title><c:out value='${companyName}'/></title>
     <link rel="stylesheet" href="../assets/css/main.css">
+    <script src="/js/lib/purify.min.js"></script>
     <script src="/js/lib/jquery.min.3.7.1.js"></script>
     <script defer src="/js/jquery-rayful-event.js"></script>
     <script defer src="/js/jquery-rayful-common.js"></script>
     <script defer src="/js/jquery-rayful-print.js"></script>
-
-    <!-- DOMPurify 라이브러리 추가 -->
-    <script src="/js/purify.min.js"></script>
 
 
 </head>
@@ -25,15 +23,16 @@
     }
 </style>
 <script type="text/javascript">
-    const attachExt = ${attachExt};
+    const companyName = "<c:out value='${companyName}' />";
     const pagination = ${pagination};
     const code = "<c:out value='${code}' />";
-
     const menuMap = ${menuMap};
     const entryMenuMap = Object.entries(menuMap);
     entryMenuMap.sort((a, b) => a[1].orderBy - b[1].orderBy);
 
     $(document).ready(function () {
+        setCompanyInfo(companyName)
+
         printMenuList(entryMenuMap);
 
         if(code !== "") {
@@ -140,27 +139,29 @@
         sendData['srchArea'] = searchAreaList;
 
         // 결과 내 재검색
+        let prevKwdInput = $('input[name=prevKwd]');
+        let kwdInput = $('input[name=kwd]');
+
         if($('input#research').prop('checked')) {
-            if($('input[name=prevKwd]').val() != '') {
-                $('input[name=prevKwd]').val($('input[name=prevKwd]').val() + ',' +$('input[name=kwd]').val());
+            if(prevKwdInput.val() != '') {
+                let prevKwdArr = prevKwdInput.val().split(',');
+                if(!prevKwdArr.includes(kwdInput.val())) {
+                    prevKwdInput.val(prevKwdInput.val() + ',' +kwdInput.val());
+                }
             } else {
-                $('input[name=prevKwd]').val($('input[name=kwd]').val());
+                prevKwdInput.val(kwdInput.val());
             }
 
-            $('input[name=kwd]').val($('input[name=prevKwd]').val());
+            kwdInput.val(prevKwdInput.val());
 
             sendData['reSrchYn'] = 'Y';
 
-            let prevKwdList = [];
-            $.each($('input[name=prevKwd]').val().split(","), function(index, item) {
-                prevKwdList.push(item);
-            })
-
+            let prevKwdList = prevKwdInput.val().split(",");
             sendData['prevKwd'] = prevKwdList;
         } else {
-            $('input[name=prevKwd]').val('');
+            prevKwdInput.val('');
         }
-        $('input[name=kwd]').val(searchKeyword);
+        kwdInput.val(searchKeyword);
 
 
         // 상세검색 내 첨부파일
@@ -235,9 +236,9 @@
                 });
             },
             error: function (data, xhr, responseText) {
-                if(data.responseText.status == 1) {
-                    // TODO - error page
-                    /*$('html').load('error/4xx');*/
+                console.log(data);
+                if(data.responseJSON.status == 1) {
+                    $('html').load('error/4xx.html')
                 }
             }
         })

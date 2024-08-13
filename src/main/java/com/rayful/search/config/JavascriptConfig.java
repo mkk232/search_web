@@ -8,12 +8,12 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+@Data
 @Configuration
 @ConfigurationProperties(prefix = "javascript")
-@Data
 public class JavascriptConfig {
+    private String companyName;
     private LinkedHashMap<String, Object> menu;
-    private List<String> attachExt;
     private Map<String, Object> pagination;
 
 }

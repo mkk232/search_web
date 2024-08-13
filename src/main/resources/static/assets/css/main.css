@@ -146,7 +146,7 @@ header .head-info .logo {
   overflow: hidden;
   width: 68px;
   height: 25px;
-  background: url("../images/common/pha_logo.png") no-repeat 0 0;
+  background: url("../images/common/rayful_logo.svg") no-repeat 0 0;
   background-size: 85%;
 }
 @media only screen and (min-width: 768px) {
@@ -3054,10 +3054,12 @@ footer .search-form .box-setting__buttom {
   }
 }
 
-.result-box {
+/* 2024-08-13 주석 처리 */
+/*.result-box {
   display: none;
-}
-@media only screen and (min-width: 768px) {
+}*/
+/* 2024-08-13 min-width 768px -> 360px 변경 */
+@media only screen and (min-width: 360px) {
   .result-box {
     display: flex;
     justify-content: flex-start;

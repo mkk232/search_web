@@ -110,7 +110,7 @@ function printDocument(target, data) {
             .append(
                 $('<p />')
                     .addClass('text-date')
-                    .html(DOMPurify.sanitize(isNull(doc.view_writer_nm) + '<b>|</b>' + doc.view_dtm))
+                    .html(DOMPurify.sanitize(ifNull(doc.view_writer_nm) + '<b>|</b>' + doc.view_dtm))
             )[0].outerHTML;
     })
 
@@ -195,16 +195,16 @@ function printPeople(target, data) {
                                     )
                                     .append(
                                         $('<li />')
-                                            .html(DOMPurify.sanitize('<strong>담당업무</strong> ' + isNull(doc.responsibility)))
+                                            .html(DOMPurify.sanitize('<strong>담당업무</strong> ' + ifNull(doc.responsibility)))
                                     )
                                     .append(
                                         $('<li />')
-                                            .html(DOMPurify.sanitize('<strong>내선번호</strong> ' + doc.phone))
+                                            .html(DOMPurify.sanitize('<strong>내선번호</strong> ' + ifNull(doc.phone)))
                                     )
                                     .append(
 
                                         $('<li />')
-                                            .html(DOMPurify.sanitize('<strong>휴대폰</strong> ' + doc.cellphone))
+                                            .html(DOMPurify.sanitize('<strong>휴대폰</strong> ' + ifNull(doc.cellphone)))
                                     )
                                     .append(
                                         $('<li />')
@@ -220,9 +220,10 @@ function printPeople(target, data) {
 
     if(collapseCd !== '99999') {
         if (target.find('div.staff-area').length > 0) {
-            target.find('ul.staff-content').append(
-                peopleList
-            )
+            target.find('ul.staff-content')
+                .append(
+                    peopleList
+                )
             return;
         }
     }
@@ -399,27 +400,17 @@ function printMoreButton(sectionName, sectionCode) {
 }
 
 function printSearchInfo(target, data) {
-    if($('input[name=resize]').val() != 'pc') {
-        return;
-    }
-    let viewText = '';
-    let prevKwd = data.prevKwd;
-    if(prevKwd.length >= 1) {
-        $.each(prevKwd, function(index, item) {
-            if(item != '') {
-                viewText += item;
-                if(index != prevKwd.length - 1) {
-                    viewText += ', ';
-                }
-            }
-        })
-    }
-
+    let viewText = data.prevKwd.join(', ');
     if(viewText != '') {
         viewText += ', ';
     }
 
     viewText += data.kwd;
+
+    let textArr = viewText.split(', ');
+    let uniqueTextArr = [...new Set(textArr)];
+    viewText = uniqueTextArr.join(', ');
+
 
     let searchInfo = '<strong class="txt-keyword">' + viewText +'</strong> 에 대한 검색 결과';
 
@@ -509,24 +500,16 @@ function printSectionHeader(target, data) {
 }
 
 function printNoResult(target, data) {
-    let viewText = '';
-    let prevKwd = data.prevKwd;
-    if(prevKwd.length >= 1) {
-        $.each(prevKwd, function(index, item) {
-            if(item != '') {
-                viewText += item;
-                if(index != prevKwd.length - 1) {
-                    viewText += ', ';
-                }
-            }
-        })
-    }
-
+    let viewText = data.prevKwd.join(', ');
     if(viewText != '') {
         viewText += ', ';
     }
 
     viewText += data.kwd;
+
+    let textArr = viewText.split(', ');
+    let uniqueTextArr = [...new Set(textArr)];
+    viewText = uniqueTextArr.join(', ');
 
     let searchInfo = '<b>' + viewText +'</b> 에 대한 검색 결과가 없습니다.';
 

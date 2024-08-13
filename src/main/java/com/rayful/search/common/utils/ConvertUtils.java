@@ -13,7 +13,7 @@ import java.util.*;
 @Slf4j
 public class ConvertUtils {
 
-//    private static final String COMPANY_URL
+    private static final String BASE_URL = "https://pt.phakr.com";
     private ConvertUtils() {}
 
     @SuppressWarnings("unchecked")
@@ -22,22 +22,18 @@ public class ConvertUtils {
         if(resultMap != null) {
             if (Integer.parseInt(String.valueOf(resultMap.get("totalCnt"))) > 0) {
                 for (Map<String, Object> sectionMap : (List<Map<String, Object>>) resultMap.get("sectionList")) {
-                    String sectionCode = (String) sectionMap.get("sectionCode");
                     for (Map<String, Object> docMap : (List<Map<String, Object>>) sectionMap.get("docList")) {
                         if(Integer.parseInt(String.valueOf(sectionMap.get("sectionCnt"))) > 0) {
 
-                            if ((((String) sectionMap.get("indexName")).startsWith("idx_01_"))
-                                    || ((String) sectionMap.get("indexName")).startsWith("idx_02_")) {
-                                addViewDate(docMap);
+                            addViewPersonImgLink(docMap);
 
-                                addViewContent(docMap);
+                            addViewDate(docMap);
 
-                                addViewDocLink(docMap, sectionCode);
+                            addViewContent(docMap);
 
-                                addViewDocDownloadLink(docMap);
-                            } else {
-                                addViewPersonImgLink(docMap);
-                            }
+                            addViewDocLink(docMap);
+
+                            addViewDocDownloadLink(docMap);
                         }
                     }
                 }
@@ -103,24 +99,16 @@ public class ConvertUtils {
     }
 
     /* 문서 링크 추가 */
-    private static void addViewDocLink(Map<String, Object> docMap, String sectionCode) {
-        String fullPath = "";
-        String frontPath = "";
-        String backPath = "";
-        String dbPath = (String) docMap.get("nsf_name");
-        String docId = (String) docMap.get("docid");
-        String viewCode = "0";
+    private static void addViewDocLink(Map<String, Object> docMap) {
+        String docLink = "";
+        String nsfName = (String) docMap.get("nsf_name");
+        if(nsfName != null) {
+            String baseUrl = BASE_URL + "/egate/global/eip/home/home.nsf/openpage?readform&url=/";
+            String docId = (String) docMap.get("docid");
+            String urlParam = "?opendocument&isundock=1";
+            docLink = baseUrl + nsfName + "/0/" + docId + urlParam;
 
-        if(dbPath != null) {
-            frontPath = "https://pt.phakr.com/egate/global/eip/home/home.nsf/openpage?readform&url=/";
-
-            if("20000".equals(sectionCode) || "40000".equals(sectionCode)) {
-                backPath = "?opendocument&isundock=1";
-            }
-
-            fullPath = frontPath + dbPath + "/" + viewCode + "/" + docId + backPath;
-
-            docMap.put("view_docLink", fullPath);
+            docMap.put("view_docLink", docLink);
         } else {
             docMap.put("view_docLink", "#");
         }
@@ -129,80 +117,29 @@ public class ConvertUtils {
     /* 첨부파일 다운로드 링크 추가 */
     @SuppressWarnings("unchecked")
     private static void addViewDocDownloadLink(Map<String, Object> docMap) {
-        String attachNm = null;
-        String docId = null;
-        String nsfName = null;
-        String frontPath = "https://pt.phakr.com/";
         List<Map<String, Object>> attachList = (List<Map<String, Object>>) docMap.get("attach_info");
         if(attachList != null && attachList.size() > 0) {
-            docId = (String) docMap.get("docid");
-            nsfName = (String) docMap.get("nsf_name");
+            String docId = (String) docMap.get("docid");
+            String nsfName = (String) docMap.get("nsf_name");
 
             for(Map<String, Object> attachMap : attachList) {
-                attachNm = (String) attachMap.get("attach_nm");
+                String attachNm = (String) attachMap.get("attach_nm");
+                String downloadLink = BASE_URL + "/" + nsfName + "/0/" + docId + "/$FILE/" + attachNm;
 
-                String downloadUrl = frontPath + nsfName + "/0/" + docId + "/$FILE/" + attachNm;
-                attachMap.put("view_downloadUrl", downloadUrl);
+                attachMap.put("view_downloadUrl", downloadLink);
             }
         }
     }
 
     /* 임직원 이미지 링크 추가 */
     private static void addViewPersonImgLink(Map<String, Object> docMap) {
-        // https://pt.phakr.com/egate/global/eip/home/pref.nsf/photo_by_empno/5222010/$file/5222010.jpg
         String personId = (String) docMap.get("person_id");
         if(personId != null) {
-            String frontPath = "https://pt.phakr.com/egate/global/eip/home/pref.nsf/photo_by_empno/";
-            String nsfName = (String) docMap.get("nsf_name");
+            String nsfName = "/egate/global/eip/home/pref.nsf/photo_by_empno/";
+            String imgLink = BASE_URL + nsfName + personId + "/$file/" + personId + ".jpg";
 
-            String viewUrl = frontPath + personId + "/$file/" + personId + ".jpg";
-            docMap.put("view_personImg", viewUrl);
+            docMap.put("view_personImg", imgLink);
         }
-    }
-
-
-    @SuppressWarnings("unchecked")
-    private static Map<String, List<Object>> getViewAggregation(Map<String, List<Object>> newAggregationMap,
-                                                                Map<String, Object> aggregationMap) {
-        if(newAggregationMap == null) {
-            newAggregationMap = new HashMap<>();
-        }
-
-
-        String fieldName = (String) aggregationMap.get("field");
-        List<Object> bucketList = null;
-        if(newAggregationMap.containsKey(fieldName)) {
-            bucketList = newAggregationMap.get(fieldName);
-        } else {
-            bucketList = new ArrayList<>();
-        }
-
-
-        for(Map<String, Object> bucket : (List<Map<String, Object>>) aggregationMap.get("buckets")) {
-            String key = (String) bucket.get("key");
-            int docCnt = (int) bucket.get("doc_count");
-
-            if(bucketList.isEmpty()) {
-                Map<String, Object> bucketMap = new HashMap<>();
-                bucketMap.put(key, docCnt);
-                bucketList.add(bucketMap);
-            } else {
-                for (Object bucketMap : bucketList) {
-                    if (((Map<String, Object>) bucketMap).containsKey(key)) {
-                        int oldDocCnt = (int) ((Map<String, Object>) bucketMap).get(key);
-                        ((Map<String, Object>) bucketMap).put(key, docCnt + oldDocCnt);
-                    } else {
-                        ((Map<String, Object>) bucketMap).put(key, docCnt);
-                    }
-
-                }
-            }
-
-            newAggregationMap.put(fieldName, bucketList);
-        }
-
-
-        return newAggregationMap;
     }
 }
 

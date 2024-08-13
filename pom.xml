@@ -144,4 +144,5 @@
 			<url>scp://root@172.18.10.126/</url>
 		</repository>
 	</distributionManagement>
+
 </project>

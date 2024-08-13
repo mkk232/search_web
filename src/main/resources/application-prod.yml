@@ -11,7 +11,6 @@ spring:
       prefix: WEB-INF/views/
       suffix: .jsp
 
-
 searchApi:
   host: http://sch.phakr.com:8002/api/search
 
@@ -21,8 +20,27 @@ logging:
     name: search_web
     level: DEBUG
 
+webclient:
+  connection-timeout: 5000
+  max-connections: 100
+  max-idle-time: 60
+  max-life-time: 60
+  pending-acquire-timeout: 5000
+  pending-acquire-maxCount: -1
+  evict-in-background: 30
+  metrics: false
+  response-timeout: 3000
+  read-timeout: 10000
+  write-timeout: 3000
+  max-in-memory-size: 100
+
+
+search:
+  client-auth: N
+
 # jsp config
 javascript:
+  company-name: PHA
   menu:
     99999:
       orderBy: 1
@@ -45,12 +63,9 @@ javascript:
       icon: icon04
       detail: N
 
-
-  attach_ext:
-    [doc, docx, ppt, pptx, xls, xlsx, pdf, txt, psd]
-
   pagination:
     defaultPageSize: 10
     pageBlockSize: 10
     moreViewSize: 10
+
 

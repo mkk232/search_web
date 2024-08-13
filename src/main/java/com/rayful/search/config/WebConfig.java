@@ -17,6 +17,7 @@ import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import reactor.core.publisher.Mono;
 import reactor.netty.http.client.HttpClient;
+import reactor.netty.resources.ConnectionProvider;
 
 import java.time.Duration;
 import java.util.concurrent.TimeUnit;
@@ -25,30 +26,75 @@ import java.util.concurrent.TimeUnit;
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
 
-//    @Value("${admin.ui.interceptor.ignore-urls}")
-//    private String[] ignoreUrls;
-//
-//    @Value("${webclient.connection-timeout}")
-//    private int timeout;
+    @Value("${searchApi.host}")
+    private String baseUrl;
 
+    @Value("${webclient.connection-timeout}")
+    private int connectionTimeout;
+
+    @Value("${webclient.max-connections}")
+    private int maxConnections;
+
+    @Value("${webclient.max-idle-time}")
+    private int maxIdleTime;
+
+    @Value("${webclient.max-life-time}")
+    private int maxLifeTime;
+
+    @Value("${webclient.pending-acquire-timeout}")
+    private int pendingAcquireTimeout;
+
+    @Value("${webclient.pending-acquire-maxCount}")
+    private int pendingAcquireMaxCount;
+
+    @Value("${webclient.evict-in-background}")
+    private int evictInBackground;
+
+    @Value("${webclient.metrics}")
+    private boolean isMetrics;
+
+    @Value("${webclient.response-timeout}")
+    private int responseTimeout;
+
+    @Value("${webclient.read-timeout}")
+    private int readTimeout;
+
+    @Value("${webclient.write-timeout}")
+    private int writeTimeout;
+
+    @Value("${webclient.max-in-memory-size}")
+    private int maxInMemorySize;
 
 
     @Bean
-    public WebClient getWebClient(@Value("${searchApi.host}") String baseUrl) {
-        HttpClient httpClient = HttpClient.create()
-                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 5000)
-                .responseTimeout(Duration.ofMillis(5000))
+    public WebClient getWebClient() {
+
+        ConnectionProvider connectionProvider = ConnectionProvider.builder("custom-provider")
+                .maxConnections(this.maxConnections)
+                .maxIdleTime(Duration.ofSeconds(this.maxIdleTime))
+                .maxLifeTime(Duration.ofSeconds(this.maxLifeTime))
+                .pendingAcquireTimeout(Duration.ofMillis(this.pendingAcquireTimeout))
+                .pendingAcquireMaxCount(this.pendingAcquireMaxCount)
+                .evictInBackground(Duration.ofSeconds(this.evictInBackground))
+                .lifo()
+                .metrics(this.isMetrics)
+                .build();
+
+        HttpClient httpClient = HttpClient.create(connectionProvider)
+                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, this.connectionTimeout)
+                .responseTimeout(Duration.ofMillis(this.responseTimeout))
                 .doOnConnected(conn ->
-                        conn.addHandlerLast(new ReadTimeoutHandler(5000, TimeUnit.MILLISECONDS))
-                                .addHandlerLast(new WriteTimeoutHandler(5000, TimeUnit.MILLISECONDS)));
+                        conn.addHandlerLast(new ReadTimeoutHandler(this.readTimeout, TimeUnit.MILLISECONDS))
+                                .addHandlerLast(new WriteTimeoutHandler(this.writeTimeout, TimeUnit.MILLISECONDS)));
+
+        ExchangeStrategies exchangeStrategies = ExchangeStrategies.builder()
+                .codecs(configurer -> configurer.defaultCodecs().maxInMemorySize(this.maxInMemorySize * 1024 * 1024)) // to unlimited memory size(-1_, 10MB (10 * 1024 * 1024)
+                .build();
 
         WebClient client = WebClient.builder()
-                .baseUrl(baseUrl)
-                .exchangeStrategies(ExchangeStrategies.builder()
-                        .codecs(configurer -> configurer.defaultCodecs()
-                                .maxInMemorySize(100 * 1024 * 1024)) // 버퍼 사이즈 100MB
-                        .build())
+                .baseUrl(this.baseUrl)
                 .clientConnector(new ReactorClientHttpConnector(httpClient))
+                .exchangeStrategies(exchangeStrategies)
                 .filter(ExchangeFilterFunction.ofRequestProcessor(
                         clientRequest -> {
                             log.debug("Request: {} {}", clientRequest.method(), clientRequest.url());
@@ -70,9 +116,4 @@ public class WebConfig implements WebMvcConfigurer {
 
         return client;
     }
-
-    //    @Override
-//    public void addInterceptors(InterceptorRegistry registry) {
-//        registry.addInterceptor(new AuthInterceptor());
-//    }
 }

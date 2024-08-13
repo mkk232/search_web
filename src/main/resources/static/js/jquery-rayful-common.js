@@ -58,7 +58,7 @@ function setFilterCondition() {
 }
 
 /* null 일 경우 빈 스트링을 반환한다. */
-function isNull(item) {
+function ifNull(item) {
     if(!item) {
         return ''
     } else {
@@ -119,4 +119,11 @@ function getCurrentCollapseCd() {
     }
 
     return selectedTap;
+}
+
+function setCompanyInfo(companyName) {
+    companyName = companyName.toLowerCase();
+    let imagePath = '/assets/images/common/' + companyName + '_logo.png';
+    let logoEle = $('h1.logo');
+    logoEle.css('background-image', `url('${imagePath}')`);
 }
